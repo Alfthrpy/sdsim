@@ -5,7 +5,7 @@ milestone: S0
 type: decision
 owner: agent
 review: human
-status: review
+status: done
 priority: high
 depends_on: []
 estimate: 1
@@ -33,7 +33,7 @@ On 2026-11-16 the owner held an architecture brainstorming session (chat, Indone
 - [x] Calendar dates in PLAN 7.3 replaced by session counts (decision 13)
 - [x] sdlab follow-ups listed in PLAN 10.4
 - [x] `python scripts/validate.py` passes
-- [ ] Owner reviewed and merged the PR (`review: human`)
+- [x] Owner approved in chat and asked the agent to merge (2026-11-16)
 
 ## Notes
 
