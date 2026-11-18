@@ -5,7 +5,7 @@ milestone: S0
 type: spike
 owner: agent
 review: agent
-status: todo
+status: in-progress
 priority: high
 depends_on: [S-001]
 estimate: 2
