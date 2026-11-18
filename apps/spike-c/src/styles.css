@@ -1,0 +1,164 @@
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  font:
+    16px/1.4 system-ui,
+    sans-serif;
+  color: #0f172a;
+  background: #fff;
+  overflow-x: hidden;
+}
+main {
+  padding: 12px 16px 120px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+h1 {
+  font-size: 20px;
+  margin: 0 0 4px;
+}
+header p {
+  margin: 0 0 8px;
+  color: #475569;
+  font-size: 14px;
+}
+.segmented {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.segmented button {
+  flex: 1;
+  min-height: 44px;
+  border: 2px solid #334155;
+  background: #fff;
+  border-radius: 10px;
+  font: inherit;
+}
+.segmented button[aria-selected="true"] {
+  background: #1e293b;
+  color: #fff;
+}
+.topology {
+  width: 100%;
+  height: 260px;
+  display: block;
+}
+.chart {
+  width: 100%;
+  height: 190px;
+  margin-top: 8px;
+}
+.flow-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 140px;
+  height: 56px;
+  justify-content: center;
+  border: 2px solid #334155;
+  border-radius: 10px;
+  background: #f1f5f9;
+  font-size: 15px;
+}
+.flow-node small {
+  font-size: 12px;
+  color: #475569;
+}
+.sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #fff;
+  border-top: 2px solid #334155;
+  border-radius: 16px 16px 0 0;
+  box-shadow: 0 -4px 16px rgb(0 0 0 / 0.15);
+  transform: translateY(calc(100% - 76px));
+  transition: transform 0.2s;
+  max-width: 480px;
+  margin: 0 auto;
+}
+.sheet.open {
+  transform: none;
+}
+.handle {
+  display: block;
+  width: 100%;
+  min-height: 76px;
+  border: 0;
+  background: none;
+  padding: 8px 16px;
+  text-align: left;
+  font: inherit;
+  touch-action: none;
+}
+.grip {
+  display: block;
+  width: 40px;
+  height: 5px;
+  border-radius: 3px;
+  background: #94a3b8;
+  margin: 0 auto 6px;
+}
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 14px;
+}
+.check.ok {
+  color: #15803d;
+}
+.check.no {
+  color: #b91c1c;
+}
+.controls {
+  padding: 4px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.controls label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.controls input[type="range"] {
+  width: 100%;
+  min-height: 44px;
+  margin: 0;
+}
+.close {
+  min-height: 44px;
+  border: 2px solid #334155;
+  border-radius: 10px;
+  background: #fff;
+  font: inherit;
+}
+.sheet-open {
+  padding-bottom: 310px;
+}
+.flow-node .react-flow__handle {
+  opacity: 0;
+}
+
+.caption {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: #334155;
+}
+.key {
+  display: inline-block;
+  width: 14px;
+  height: 3px;
+  vertical-align: middle;
+}
+.key.blue {
+  background: #2563eb;
+}
+.key.red {
+  background: #dc2626;
+}
