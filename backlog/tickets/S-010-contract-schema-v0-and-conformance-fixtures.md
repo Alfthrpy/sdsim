@@ -5,7 +5,7 @@ milestone: S1
 type: contract
 owner: agent
 review: agent
-status: todo
+status: in-progress
 priority: high
 depends_on: [S-001, S-103]
 estimate: 1
