@@ -5,7 +5,7 @@ milestone: S1
 type: contract
 owner: agent
 review: agent
-status: in-progress
+status: done
 priority: high
 depends_on: [S-001, S-103]
 estimate: 1
@@ -30,7 +30,7 @@ JSON Schema matching content-schema §5 with keys/skew under traffic (R24); comp
 - [x] The scenario and play fields from S-103 are in the schema (named `case` and `play`)
 - [x] `python scripts/validate.py` passes; lint, typecheck and tests pass
 - [x] Independent review (code-reviewer) done and findings fixed (see Notes)
-- [ ] CI green
+- [x] CI green (PR #9)
 
 ## Notes
 
