@@ -5,7 +5,7 @@ milestone: S0
 type: infra
 owner: agent
 review: human
-status: todo
+status: review
 priority: high
 depends_on: []
 estimate: 1
@@ -28,10 +28,17 @@ npm workspaces (incl. packages/components, sandbox/), TS 6.0.3, Vitest, ESLint b
 
 ## Done criteria
 
-- [ ] The PLAN row's outputs exist and behave as described above
-- [ ] Definition of done in `docs/PLAN.md` section 9.7 is met
-- [ ] `python scripts/validate.py` passes
+- [x] npm workspaces with `packages/{engine,components,lab-runtime,cli}` and `sandbox/`; TS 6.0.3 strict; Vitest; ESLint with engine bans and layer boundaries; Prettier; `ci.yml`
+- [x] The engine bans and the boundaries are proven to fire (a temporary file breaking each rule failed lint; removed afterwards)
+- [x] `engineering.md` wording (R13) and layer table (ADR 0003) fixed; `ux-reviewer` stub added; ADR 0004 written
+- [x] `npm run lint`, `format`, `typecheck`, `npm test` and `python scripts/validate.py` pass locally
+- [ ] CI is green on GitHub, which also confirms free Actions minutes on the public repo (verified when the PR runs)
+- [ ] Owner reviewed and merged (`review: human`)
 
 ## Notes
 
-(Filled in during the work.)
+- `docs/PLAN.md` says `tickets.yml` exists; it does not. `ci.yml` has a `tickets` job (validate.py and the unit tests) instead.
+- `npm audit`: one moderate advisory (minimatch, via typescript-eslint 8.72.2, dev-only). Not fixed because the pin is from PLAN 5.3; see ADR 0004.
+- Added `@types/node` 24.10.1 (not in PLAN 5.3) for `packages/cli` and Vitest; the engine packages use `types: []`, so it does not reach them.
+- Prettier excludes Markdown, `backlog/` and `sessions/` so existing docs are not reformatted.
+- The ADR is `0004` and is marked `proposed` until the owner merges.
