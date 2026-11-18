@@ -1,0 +1,20 @@
+// Spike only: in the real app these come from contract/i18n/id.yaml and the lab spec (AGENTS.md language policy).
+export const t = {
+  title: "Cache di depan database",
+  goal: "Turunkan beban database di bawah 60% saat jam ramai, tanpa mengubah jumlah koneksi.",
+  illustrative: "ilustratif",
+  capacity: "Kapasitas cache (% kunci)",
+  ttl: "TTL (detik)",
+  dbLoad: "Beban database",
+  memory: "Memori cache ≤ 25%",
+  pass: "Lolos",
+  notYet: "Belum",
+  sheetOpen: "Atur parameter",
+  sheetClose: "Tutup",
+  hit: "hit",
+  chartTitle: "Utilisasi database",
+  target: "Target 60%",
+  variantSvg: "SVG",
+  variantFlow: "React Flow",
+  nodes: { users: "Pengguna", app: "Aplikasi", cache: "Cache", db: "Database" },
+} as const;
