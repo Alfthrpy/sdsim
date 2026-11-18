@@ -5,7 +5,7 @@ milestone: S0
 type: spike
 owner: agent
 review: agent
-status: in-progress
+status: done
 priority: high
 depends_on: [S-001]
 estimate: 2
@@ -31,7 +31,7 @@ React Flow vs SVG prototype at 360 px, bottom sheet, one uPlot chart; measure C1
 - [x] `ux-reviewer` stub filled in with a checklist
 - [x] `python scripts/validate.py` passes; lint, typecheck, tests pass
 - [x] Independent review (ux-reviewer and code-reviewer) done and findings fixed (see Notes)
-- [ ] CI green
+- [x] CI green (PR #7)
 
 ## Notes
 
