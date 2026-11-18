@@ -1,6 +1,6 @@
 # Lab flow: case, play, tune, check
 
-Ticket S-103. Status: proposal for owner approval (`review: human`). Motivation: the owner tried the spike C prototype on a phone (2026-11-18) and could not tell what the screen was about: a fixed bar and a chart, no story, nothing happening, no moment of "this is what is broken".
+Ticket S-103. Status: approved by the owner on 2026-11-18 (flow, play one tap after the case, calibration unchanged). Motivation: the owner tried the spike C prototype on a phone (2026-11-18) and could not tell what the screen was about: a fixed bar and a chart, no story, nothing happening, no moment of "this is what is broken".
 
 ## 1. The flow
 
@@ -85,19 +85,19 @@ Engine: S-021 records the per-node and per-edge series in the result of every ru
 
 This is what the caching lab could say, so the owner can judge the flow. All numbers are illustrative until the engine produces them.
 
-> **Warung Kita, jam 19.00.** Toko online kecil ini biasanya melayani 80 permintaan per detik. Mulai pukul 19.00 ada flash sale, dan trafik naik menjadi 240 permintaan per detik. Semua permintaan baca harus ke database, dan database punya 4 koneksi saja.
+> **Warung Kita, jam 19.00.** Toko online kecil ini biasanya melayani 80 permintaan per detik. Mulai pukul 19.00 ada flash sale, dan trafik naik menjadi 160 permintaan per detik. Semua permintaan baca harus ke database, dan database punya 4 koneksi saja.
 >
-> **Gejala.** Halaman produk makin lambat, lalu mulai gagal.
+> **Gejala.** Halaman produk makin lambat.
 >
 > **Tujuan.** Jaga beban database di bawah 60% tanpa menambah koneksi.
 >
-> *Putar kondisi awal:* menit 2 trafik naik, menit 3 antrean database menumpuk, menit 4 permintaan mulai timeout.
+> *Putar kondisi awal:* menit 2 trafik naik, menit 3 database sibuk (kuning) dan permintaan menunggu lama.
 >
 > *Atur:* kapasitas cache dan TTL.
 >
 > *Putar lagi:* database tetap hijau; sebagian besar pembacaan dijawab oleh cache.
 
-Questions for `sdlab`: whether the peak of 240 is acceptable (it changes `traffic.schedule` and the calibration of the lab's targets), and who writes the captions.
+Question for `sdlab`: who writes the captions. (The peak of 240 requests/s in the first draft was declined by the owner; the case now uses the lab's own 160.)
 
 ## 7. Plan changes proposed
 
@@ -107,9 +107,12 @@ Questions for `sdlab`: whether the peak of 240 is acceptable (it changes `traffi
 4. S-063 (sampled tokens) and live mode stay after BG2.
 5. Cost: BG1 goes from 35 to 36 agent sessions, early access from 41 to 42, the total from 80 to 81.
 
-## 8. Not decided here
+## 8. Decided and not decided
 
-- Whether play is on by default or one tap away (this design says one tap, after the case, before tune).
+Decided by the owner (2026-11-18): the flow, including playing the baseline first; play is one tap after the case, not automatic; the peak stays at the lab's own calibration (no 240 requests/s), so the caching baseline shows an amber database, not a red one. Section 3 describes the alternative that was declined; section 6 was rewritten for the lab's own calibration (160 requests/s, strained database).
+
+Not decided:
+
 - Final thresholds for node states (they are illustrative; they will be tuned when the engine produces real series, S-070).
 - Whether the case text lives in the lab spec only or also as a separate "case" page in the content bundle (S-100); this design puts it in the spec.
 - A desktop layout; the flow is the same, with more room.
