@@ -86,6 +86,9 @@ npm run lint                          # ESLint: engine purity bans, layer bounda
 npm run format                        # Prettier check (code and config; not Markdown)
 npm run typecheck                     # tsc per package
 npm test                              # Vitest
+npx playwright install chromium       # once, for the browser specs
+npm run test:browser                  # Chromium: golden hashes and log match Node
+npm run measure:browser               # Chromium: grading time and snapshot cost (prints, no asserts)
 
 pip install pyyaml
 python scripts/validate.py            # validate tickets

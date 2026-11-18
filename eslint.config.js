@@ -35,12 +35,50 @@ export default tseslint.config(
       "no-restricted-properties": [
         "error",
         { object: "Math", property: "random", message: "Use a seeded RNG stream." },
+        ...[
+          "log",
+          "log2",
+          "log10",
+          "log1p",
+          "exp",
+          "expm1",
+          "pow",
+          "sin",
+          "cos",
+          "tan",
+          "asin",
+          "acos",
+          "atan",
+          "atan2",
+          "sinh",
+          "cosh",
+          "tanh",
+          "asinh",
+          "acosh",
+          "atanh",
+          "cbrt",
+          "hypot",
+        ].map((property) => ({
+          object: "Math",
+          property,
+          message:
+            "Not bit-identical across V8 versions (Node vs Chromium): use rng/log.ts or basic arithmetic.",
+        })),
       ],
       "no-restricted-syntax": [
         "error",
         {
           selector: "ForInStatement",
           message: "No for...in: iteration order must depend only on inputs.",
+        },
+        {
+          selector: "BinaryExpression[operator='**'], AssignmentExpression[operator='**=']",
+          message:
+            "`**` is Math.pow: its last bit is engine-defined. Multiply, or double repeatedly.",
+        },
+        {
+          selector: "VariableDeclarator[init.name='Math'][id.type='ObjectPattern']",
+          message: "Do not destructure Math: it hides the Math.* bans.",
         },
       ],
     },

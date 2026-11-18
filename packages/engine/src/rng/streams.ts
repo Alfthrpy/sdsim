@@ -1,4 +1,5 @@
 import { xoroshiro128plus } from "pure-rand/generator/xoroshiro128plus";
+import { deterministicLog } from "./log.ts";
 
 /** FNV-1a over a string, 32 bits. Used to derive a stream seed from (seed, component, purpose). */
 function hash32(text: string): number {
@@ -26,7 +27,7 @@ export class RandomStream {
 
   /** Exponential variate with the given rate (mean 1 / rate). */
   exponential(rate: number): number {
-    return -Math.log(1 - this.uniform()) / rate;
+    return -deterministicLog(1 - this.uniform()) / rate;
   }
 }
 
