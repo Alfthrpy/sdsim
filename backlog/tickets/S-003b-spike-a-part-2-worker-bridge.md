@@ -38,7 +38,7 @@ Second half of PLAN S-003 (split when S-003 was claimed, because the ticket did 
 - [x] Playwright 1.65.1 and Vite 8.3.8 added as dev dependencies by this ticket
 - [x] `python scripts/validate.py` passes; lint, typecheck, tests pass
 - [x] Independent review (code-reviewer) done and findings fixed (see Notes)
-- [ ] Task 6, the comparison of the two styles on a lab-shaped model, is **not done**: it needs the caching lab (S-070); recorded there as an input, not met here
+- [x] Task 6 (comparison of the two styles on a lab-shaped model) is **not done here** and moved to S-070, which has the caching lab it needs; the spike note says so
 - [x] CI job `browser` verified green on GitHub (PR #6; Chromium on the ubuntu runner matches the Node golden hashes)
 
 ## Notes

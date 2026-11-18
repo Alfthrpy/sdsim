@@ -23,6 +23,8 @@ Caching lab from sdlab end to end; lab CI and V5 subset for L05; propose recalib
 
 ## Done criteria
 
+- [ ] Carried over from S-003b: run the caching lab's model in both styles (callbacks and generator processes) in a Worker, compare grading time and events per request with the numbers in `docs/spikes/A.md`, and record whether the generator style meets the 5 s grading budget (and, on the owner's phone from S-008, the budget at that speed)
+
 - [ ] The PLAN row's outputs exist and behave as described above
 - [ ] Definition of done in `docs/PLAN.md` section 9.7 is met
 - [ ] `python scripts/validate.py` passes
