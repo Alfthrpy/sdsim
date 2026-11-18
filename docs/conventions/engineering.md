@@ -6,9 +6,12 @@ Rules every code ticket follows. The toolchain, versions, performance budgets an
 
 | Layer | Package | May depend on | Runs in |
 | --- | --- | --- | --- |
-| L0 Contract | `contract/` | nothing | build time; vendored into `sdlab` |
-| L1 Engine | `packages/engine` | L0 | Worker; Node (tests, CLI) |
-| L2 Lab runtime | `packages/lab-runtime` | L0, L1 | Worker; Node (lab CI) |
+| L0 Contract | `contract/` | nothing at runtime; built from component descriptors | build time; vendored into `sdlab` |
+| L1 Engine (kernel) | `packages/engine` | nothing | Worker; Node (tests, CLI) |
+| L1' Components | `packages/components` | L1 | Worker; Node |
+| L2 Lab runtime | `packages/lab-runtime` | L0, L1, L1' | Worker; Node (lab CI) |
+| L2' CLI | `packages/cli` | L0, L1, L1', L2 | Node |
+| Sandbox | `sandbox/` | public entry points of L1, L1', L2' only; nothing imports it | Node (CLI) |
 | L3 UI | `packages/ui`, `apps/web` | L0, L2 (by messages) | Main thread |
 
 A dependency pointing the other way, or the UI importing the engine directly, is a defect.
@@ -17,7 +20,7 @@ A dependency pointing the other way, or the UI importing the engine directly, is
 
 - No DOM, no wall clock (`Date.now`, `performance.now`), no `Math.random`, no global mutable state.
 - All randomness comes from named seeded streams, so adding a random draw in one component does not change another component's sequence.
-- Same spec + same seed = same event log, byte for byte, in Node and in a browser Worker. The event-log hash is the determinism test.
+- Same spec + same seed = same event log, byte for byte, within one JavaScript engine: Node and Chromium (both V8) must give the same event-log hash. Firefox and WebKit are compared statistically, not bitwise (PLAN R13). The event-log hash is the determinism test.
 - Time is simulated time. Snapshots for the UI are sampled; the UI never drives the simulation clock.
 
 ## Honesty labels
