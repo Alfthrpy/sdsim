@@ -5,7 +5,7 @@ milestone: S1
 type: decision
 owner: agent
 review: human
-status: review
+status: done
 priority: high
 depends_on: []
 estimate: 1
@@ -29,9 +29,9 @@ The owner tried the spike C prototype on a phone and could not tell what the scr
 - [x] The design document exists and answers: what the learner sees at each step, what the engine records, what "crash" can show with the current lab, what changes in the contract
 - [x] PLAN and tickets reflect the proposed changes (S-063a created, S-010 depends on this ticket, counts updated)
 - [x] `python scripts/validate.py` passes
-- [ ] Owner approved the flow and the plan changes (`review: human`)
+- [x] Owner approved the flow and the plan changes (`review: human`, in chat and by merging PR #8)
 
 ## Notes
 
 - The current caching lab baseline runs the database at about 84%: "strained", not "failing". A visible crash needs a load that overloads the database (about 240 requests/s gives about 126%); that is a calibration change owned by `sdlab`, proposed in the document, not made here.
-- Open for the owner: play one tap after the case (proposed) or on by default; whether the peak of 240 is acceptable.
+- Owner decisions (2026-11-18, chat): the flow is approved including playing the baseline before tuning; play is one tap after the case (not automatic); **the peak is not raised to 240**, so the caching lab keeps its calibration and its baseline shows the database as strained (amber), not failing (red). A visible crash would need another lab or a later calibration change.

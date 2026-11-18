@@ -19,7 +19,7 @@ Added by S-103 (`docs/design/lab-flow.md`): the owner wants to watch the system 
 
 ## Tasks
 
-Per `docs/design/lab-flow.md` sections 2 and 4: timeline with play, pause, speed (1x, 10x, 60x) and a scrubber; node states ok, strained, failing from the recorded series (label and color, thresholds illustrative); captions from `scenario.timeline`; the chart follows the timeline; the baseline can be played before any edit; all text from `id.yaml` or the lab spec.
+Per `docs/design/lab-flow.md` sections 2 and 4: timeline with play, pause, speed (1x, 10x, 60x) and a scrubber; node states ok, strained, failing from the recorded series (label and color, thresholds illustrative); captions from `case.timeline`; the chart follows the timeline; the baseline can be played before any edit; all text from `id.yaml` or the lab spec.
 
 ## Done criteria
 

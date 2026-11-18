@@ -1,0 +1,1326 @@
+# Conformance cases for contract/lab-spec.schema.json. Each case is a change to the base lab
+# (fixtures/valid/caching-basics.yaml) written as RFC 6902-style operations (remove, replace, add; "-" appends to a list).
+# A test applies the patch, validates, and compares the verdict.
+#
+#   schema:   valid | invalid     verdict of the JSON Schema (structure)
+#   at:       JSON pointer of the first problem the schema reports (invalid cases)
+#   keyword:  the failing JSON Schema keyword
+#   property: the missing or unexpected property name (required / additionalProperties)
+#   sdlab:    for `schema: valid` cases that sdlab's scripts/validate.py still rejects: the rule it applies. These are
+#             validator rules that JSON Schema cannot express (cross-field, ordering, references, anti-leak); see RULES.md.
+#   differs:  the schema is stricter than sdlab's validator today (sdlab accepts it); sdlab should tighten when vendoring.
+#
+# Cases marked `from` come from sdlab tests/test_labs.py (same mutation), so the two repos can be compared.
+
+# ---------------------------------------------------------------- valid variants
+- name: base
+  schema: valid
+- name: case-and-play-fields
+  differs: "new fields from S-103: sdlab's validator does not know `case` and `play` yet; it must accept them before contract 0.1.0"
+  schema: valid
+  patch:
+    - {
+        op: add,
+        path: /case,
+        value:
+          {
+            story: "Toko online ramai jam 19.00.",
+            symptom: "Halaman makin lambat.",
+            timeline:
+              [{ at_s: 120, caption: "Trafik naik." }, { at_s: 180, caption: "Database sibuk." }],
+            observe: [db],
+          },
+      }
+    - { op: add, path: /play, value: { speeds: [1, 10, 60], default_speed: 60 } }
+- name: case-with-story-only
+  differs: "new fields from S-103: sdlab's validator does not know `case` and `play` yet; it must accept them before contract 0.1.0"
+  schema: valid
+  patch: [{ op: add, path: /case, value: { story: "Cerita." } }]
+- name: illustrative-with-note
+  schema: valid
+  patch:
+    - { op: replace, path: /illustrative, value: true }
+    - { op: add, path: /illustrative_note, value: "Angka ini ilustrasi." }
+- name: secondary-concepts
+  schema: valid
+  patch: [{ op: add, path: /secondary_concepts, value: [connection-pooling] }]
+- name: edges-as-mappings-with-policies
+  from: LabTopology.test_edges_may_be_mappings
+  schema: valid
+  patch:
+    - {
+        op: replace,
+        path: /topology/edges,
+        value:
+          [
+            {
+              from: users,
+              to: app,
+              policies: [timeout, { id: retry, params: { max_attempts: 3, backoff: exponential } }],
+            },
+            [app, cache],
+            [app, db],
+          ],
+      }
+- name: traffic-without-read-share
+  schema: valid
+  patch: [{ op: remove, path: /traffic/read_share }]
+- name: diagnose-mode
+  from: LabModes.test_diagnose_needs_a_scenario
+  schema: valid
+  patch:
+    - { op: replace, path: /mode, value: diagnose }
+    - {
+        op: add,
+        path: /scenarios,
+        value:
+          [
+            { id: bad-deploy, at_s: 60 },
+            { id: slow-dependency, at_s: 90, duration_s: 30, params: { added_latency_ms: 200 } },
+          ],
+      }
+- name: build-mode
+  from: LabModes.test_build_needs_a_palette
+  schema: valid
+  patch:
+    - { op: replace, path: /mode, value: build }
+    - { op: remove, path: /allowed_edits }
+    - { op: add, path: /palette, value: [{ type: cache, max: 2 }, { type: load-balancer, max: 1 }] }
+- name: brute-force-waiver-instead-of-entry
+  from: LabSolutions.test_brute_force_entry_or_waiver
+  schema: valid
+  patch:
+    - { op: remove, path: /wrong_answers/1/brute_force }
+    - { op: add, path: /brute_force_ok, value: "Tiap nilai ekstrem berbahaya." }
+- name: all-predicates-with-valid-args
+  schema: valid
+  patch:
+    - op: replace
+      path: /structural_rules
+      value:
+        - {
+            id: r1,
+            predicate: has-node,
+            args: { type: cache, min: 1 },
+            feedback_pass: ok,
+            feedback_fail: gagal,
+          }
+        - {
+            id: r2,
+            predicate: has-edge,
+            args: { from: app, to: cache },
+            feedback_pass: ok,
+            feedback_fail: gagal,
+          }
+        - {
+            id: r3,
+            predicate: node-between,
+            args: { node: cache, from: app, to: db },
+            feedback_pass: ok,
+            feedback_fail: gagal,
+          }
+        - {
+            id: r4,
+            predicate: param-unchanged,
+            args: { node: db, param: pool },
+            feedback_pass: ok,
+            feedback_fail: gagal,
+          }
+        - {
+            id: r5,
+            predicate: param-range,
+            args: { node: cache, param: capacity_pct, min: 0 },
+            feedback_pass: ok,
+            feedback_fail: gagal,
+          }
+        - {
+            id: r6,
+            predicate: count-le,
+            args: { type: cache, max: 2 },
+            feedback_pass: ok,
+            feedback_fail: gagal,
+          }
+        - {
+            id: r7,
+            predicate: policy-present,
+            args: { from: users, to: app, policy: timeout },
+            feedback_pass: ok,
+            feedback_fail: gagal,
+          }
+        - {
+            id: r8,
+            predicate: no-spof,
+            args: { type: db },
+            feedback_pass: ok,
+            feedback_fail: gagal,
+          }
+- name: no-structural-rules
+  schema: valid
+  patch: [{ op: remove, path: /structural_rules }]
+- name: latency-target-paired-with-error-rate
+  from: LabGrading.test_latency_target_needs_an_error_or_goodput_target
+  schema: valid
+  patch:
+    - {
+        op: add,
+        path: /targets/-,
+        value:
+          {
+            id: p99,
+            metric: latency_p99_ms,
+            node: users,
+            window: { from_s: 180, to_s: 600 },
+            aggregate: p99,
+            op: "<=",
+            value: 500,
+            feedback_pass: ok,
+            feedback_fail: gagal,
+          },
+      }
+- name: duration-outside-the-target-range-is-only-a-warning
+  from: LabBasics.test_duration_warns_outside_target
+  schema: valid
+  patch: [{ op: replace, path: /duration_min, value: 45 }]
+- name: tier-3-hint-may-name-a-value
+  from: LabAntiLeak.test_tier_1_and_2_hints_must_not_contain_values_but_tier_3_may_name_mechanism
+  schema: valid
+  patch: [{ op: replace, path: /hints/2/text, value: "TTL 300 cukup lama." }]
+
+# ---------------------------------------------------------------- required fields (sdlab test_required_fields)
+- {
+    name: missing-goal,
+    from: LabBasics.test_required_fields,
+    schema: invalid,
+    at: "",
+    keyword: required,
+    property: goal,
+    patch: [{ op: remove, path: /goal }],
+  }
+- {
+    name: missing-targets,
+    from: LabBasics.test_required_fields,
+    schema: invalid,
+    at: "",
+    keyword: required,
+    property: targets,
+    patch: [{ op: remove, path: /targets }],
+  }
+- {
+    name: missing-hints,
+    from: LabBasics.test_required_fields,
+    schema: invalid,
+    at: "",
+    keyword: required,
+    property: hints,
+    patch: [{ op: remove, path: /hints }],
+  }
+- {
+    name: missing-reference-solution,
+    from: LabBasics.test_required_fields,
+    schema: invalid,
+    at: "",
+    keyword: required,
+    property: reference_solution,
+    patch: [{ op: remove, path: /reference_solution }],
+  }
+- {
+    name: missing-wrong-answers,
+    from: LabBasics.test_required_fields,
+    schema: invalid,
+    at: "",
+    keyword: required,
+    property: wrong_answers,
+    patch: [{ op: remove, path: /wrong_answers }],
+  }
+- {
+    name: missing-debrief,
+    from: LabBasics.test_required_fields,
+    schema: invalid,
+    at: "",
+    keyword: required,
+    property: debrief,
+    patch: [{ op: remove, path: /debrief }],
+  }
+- {
+    name: missing-sources,
+    from: LabBasics.test_required_fields,
+    schema: invalid,
+    at: "",
+    keyword: required,
+    property: sources,
+    patch: [{ op: remove, path: /sources }],
+  }
+- {
+    name: missing-topology,
+    from: LabBasics.test_required_fields,
+    schema: invalid,
+    at: "",
+    keyword: required,
+    property: topology,
+    patch: [{ op: remove, path: /topology }],
+  }
+- {
+    name: missing-traffic,
+    schema: invalid,
+    at: "",
+    keyword: required,
+    property: traffic,
+    patch: [{ op: remove, path: /traffic }],
+  }
+- {
+    name: empty-goal,
+    from: LabBasics.test_required_fields,
+    schema: invalid,
+    at: /goal,
+    keyword: pattern,
+    patch: [{ op: replace, path: /goal, value: "  " }],
+  }
+- {
+    name: empty-targets-list,
+    from: LabBasics.test_required_fields,
+    schema: invalid,
+    at: /targets,
+    keyword: minItems,
+    patch: [{ op: replace, path: /targets, value: [] }],
+  }
+
+# ---------------------------------------------------------------- enums, versions, ids (sdlab test_enums_and_versions)
+- {
+    name: bad-mode,
+    from: LabBasics.test_enums_and_versions,
+    schema: invalid,
+    at: /mode,
+    keyword: enum,
+    patch: [{ op: replace, path: /mode, value: free }],
+  }
+- {
+    name: difficulty-4,
+    from: LabBasics.test_enums_and_versions,
+    schema: invalid,
+    at: /difficulty,
+    keyword: enum,
+    patch: [{ op: replace, path: /difficulty, value: 4 }],
+  }
+- {
+    name: difficulty-true,
+    from: LabBasics.test_enums_and_versions,
+    schema: invalid,
+    at: /difficulty,
+    keyword: enum,
+    patch: [{ op: replace, path: /difficulty, value: true }],
+  }
+- {
+    name: contract-version-not-semver,
+    from: LabBasics.test_enums_and_versions,
+    schema: invalid,
+    at: /contract_version,
+    keyword: pattern,
+    patch: [{ op: replace, path: /contract_version, value: "1.0" }],
+  }
+- {
+    name: contract-version-a-number,
+    schema: invalid,
+    at: /contract_version,
+    keyword: type,
+    patch: [{ op: replace, path: /contract_version, value: 0.1 }],
+  }
+- {
+    name: lab-id-not-kebab,
+    from: LabBasics.test_enums_and_versions,
+    schema: invalid,
+    at: /id,
+    keyword: pattern,
+    patch: [{ op: replace, path: /id, value: Bad_ID }],
+  }
+- {
+    name: negative-duration,
+    from: LabBasics.test_duration_warns_outside_target,
+    schema: invalid,
+    at: /duration_min,
+    keyword: exclusiveMinimum,
+    patch: [{ op: replace, path: /duration_min, value: -1 }],
+  }
+- {
+    name: illustrative-without-note,
+    from: LabBasics.test_illustrative_needs_a_note,
+    schema: invalid,
+    at: "",
+    keyword: required,
+    property: illustrative_note,
+    patch: [{ op: replace, path: /illustrative, value: true }],
+  }
+- {
+    name: illustrative-not-a-boolean,
+    schema: invalid,
+    at: /illustrative,
+    keyword: type,
+    patch: [{ op: replace, path: /illustrative, value: "yes" }],
+  }
+- {
+    name: unknown-root-field,
+    schema: invalid,
+    at: "",
+    keyword: additionalProperties,
+    property: display_scale,
+    patch: [{ op: add, path: /display_scale, value: 2 }],
+  }
+- {
+    name: secondary-concepts-not-a-list,
+    schema: invalid,
+    at: /secondary_concepts,
+    keyword: type,
+    patch: [{ op: add, path: /secondary_concepts, value: connection-pooling }],
+  }
+
+# ---------------------------------------------------------------- topology and traffic (sdlab LabTopology)
+- {
+    name: node-id-not-kebab,
+    from: LabTopology.test_duplicate_and_bad_node_ids,
+    schema: invalid,
+    at: /topology/nodes/0/id,
+    keyword: pattern,
+    patch: [{ op: replace, path: /topology/nodes/0/id, value: Users_1 }],
+  }
+- {
+    name: node-without-type,
+    schema: invalid,
+    at: /topology/nodes/1,
+    keyword: required,
+    property: type,
+    patch: [{ op: remove, path: /topology/nodes/1/type }],
+  }
+- {
+    name: unknown-field-in-node,
+    schema: invalid,
+    at: /topology/nodes/1,
+    keyword: additionalProperties,
+    property: label,
+    patch: [{ op: add, path: /topology/nodes/1/label, value: x }],
+  }
+- {
+    name: node-params-not-a-mapping,
+    schema: invalid,
+    at: /topology/nodes/1/params,
+    keyword: type,
+    patch: [{ op: replace, path: /topology/nodes/1/params, value: [1, 2] }],
+  }
+- {
+    name: node-param-value-a-list,
+    differs: "sdlab does not check the type of node param values",
+    schema: invalid,
+    at: /topology/nodes/1/params/threads,
+    keyword: type,
+    patch: [{ op: replace, path: /topology/nodes/1/params/threads, value: [16] }],
+  }
+- {
+    name: empty-node-list,
+    schema: invalid,
+    at: /topology/nodes,
+    keyword: minItems,
+    patch: [{ op: replace, path: /topology/nodes, value: [] }],
+  }
+- {
+    name: edge-with-three-ends,
+    schema: invalid,
+    at: /topology/edges/0,
+    keyword: oneOf,
+    patch: [{ op: replace, path: /topology/edges/0, value: [users, app, db] }],
+  }
+- {
+    name: edge-mapping-without-to,
+    schema: invalid,
+    at: /topology/edges/0,
+    keyword: oneOf,
+    patch: [{ op: replace, path: /topology/edges/0, value: { from: users } }],
+  }
+- {
+    name: edge-end-not-kebab,
+    schema: invalid,
+    at: /topology/edges/0,
+    keyword: oneOf,
+    patch: [{ op: replace, path: /topology/edges/0, value: [Users, app] }],
+  }
+- {
+    name: empty-traffic-schedule,
+    from: LabTopology.test_traffic_rules,
+    schema: invalid,
+    at: /traffic/schedule,
+    keyword: minItems,
+    patch: [{ op: replace, path: /traffic/schedule, value: [] }],
+  }
+- {
+    name: read-share-above-one,
+    from: LabTopology.test_traffic_rules,
+    schema: invalid,
+    at: /traffic/read_share,
+    keyword: maximum,
+    patch: [{ op: replace, path: /traffic/read_share, value: 1.5 }],
+  }
+- {
+    name: negative-rate,
+    schema: invalid,
+    at: /traffic/schedule/0/rate,
+    keyword: minimum,
+    patch: [{ op: replace, path: /traffic/schedule/0/rate, value: -5 }],
+  }
+- {
+    name: keys-not-an-integer,
+    differs: "sdlab does not check traffic.keys",
+    schema: invalid,
+    at: /traffic/keys,
+    keyword: type,
+    patch: [{ op: replace, path: /traffic/keys, value: 10.5 }],
+  }
+- {
+    name: negative-skew,
+    differs: "sdlab does not check traffic.skew",
+    schema: invalid,
+    at: /traffic/skew,
+    keyword: minimum,
+    patch: [{ op: replace, path: /traffic/skew, value: -1 }],
+  }
+- {
+    name: unknown-traffic-field,
+    differs: "sdlab does not check unknown traffic fields",
+    schema: invalid,
+    at: /traffic,
+    keyword: additionalProperties,
+    property: burst,
+    patch: [{ op: add, path: /traffic/burst, value: 3 }],
+  }
+
+# ---------------------------------------------------------------- modes (sdlab LabModes)
+- {
+    name: tune-without-allowed-edits,
+    from: LabModes.test_tune_needs_allowed_edits,
+    schema: invalid,
+    at: "",
+    keyword: required,
+    property: allowed_edits,
+    patch: [{ op: remove, path: /allowed_edits }],
+  }
+- {
+    name: tune-with-empty-allowed-edits,
+    schema: invalid,
+    at: /allowed_edits,
+    keyword: minItems,
+    patch: [{ op: replace, path: /allowed_edits, value: [] }],
+  }
+- {
+    name: tune-with-scenarios,
+    schema: invalid,
+    at: /scenarios,
+    keyword: false schema,
+    patch: [{ op: add, path: /scenarios, value: [{ id: bad-deploy, at_s: 60 }] }],
+  }
+- {
+    name: tune-with-palette,
+    schema: invalid,
+    at: /palette,
+    keyword: false schema,
+    patch: [{ op: add, path: /palette, value: [{ type: cache, max: 1 }] }],
+  }
+- {
+    name: diagnose-without-scenarios,
+    from: LabModes.test_diagnose_needs_a_scenario,
+    schema: invalid,
+    at: "",
+    keyword: required,
+    property: scenarios,
+    patch: [{ op: replace, path: /mode, value: diagnose }],
+  }
+- {
+    name: diagnose-with-palette,
+    schema: invalid,
+    at: /palette,
+    keyword: false schema,
+    patch:
+      [
+        { op: replace, path: /mode, value: diagnose },
+        { op: add, path: /scenarios, value: [{ id: bad-deploy, at_s: 60 }] },
+        { op: add, path: /palette, value: [{ type: cache, max: 1 }] },
+      ],
+  }
+- {
+    name: build-without-palette,
+    from: LabModes.test_build_needs_a_palette,
+    schema: invalid,
+    at: "",
+    keyword: required,
+    property: palette,
+    patch: [{ op: replace, path: /mode, value: build }, { op: remove, path: /allowed_edits }],
+  }
+- {
+    name: build-with-allowed-edits,
+    schema: invalid,
+    at: /allowed_edits,
+    keyword: false schema,
+    patch:
+      [
+        { op: replace, path: /mode, value: build },
+        { op: add, path: /palette, value: [{ type: cache, max: 1 }] },
+      ],
+  }
+- {
+    name: scenario-without-at-s,
+    schema: invalid,
+    at: /scenarios/0,
+    keyword: required,
+    property: at_s,
+    patch:
+      [
+        { op: replace, path: /mode, value: diagnose },
+        { op: add, path: /scenarios, value: [{ id: bad-deploy }] },
+      ],
+  }
+- {
+    name: allowed-edit-without-max,
+    from: LabModes.test_allowed_edit_checks,
+    schema: invalid,
+    at: /allowed_edits/0,
+    keyword: required,
+    property: max,
+    patch: [{ op: remove, path: /allowed_edits/0/max }],
+  }
+- {
+    name: allowed-edit-param-not-snake-case,
+    schema: invalid,
+    at: /allowed_edits/0/param,
+    keyword: pattern,
+    patch: [{ op: replace, path: /allowed_edits/0/param, value: "Capacity Pct" }],
+  }
+
+# ---------------------------------------------------------------- targets and rules (sdlab LabGrading)
+- {
+    name: target-without-feedback-fail,
+    from: LabGrading.test_feedback_required_and_ids_unique,
+    schema: invalid,
+    at: /targets/0,
+    keyword: required,
+    property: feedback_fail,
+    patch: [{ op: remove, path: /targets/0/feedback_fail }],
+  }
+- {
+    name: target-aggregate-median,
+    from: LabGrading.test_target_fields,
+    schema: invalid,
+    at: /targets/0/aggregate,
+    keyword: enum,
+    patch: [{ op: replace, path: /targets/0/aggregate, value: median }],
+  }
+- {
+    name: target-op-not-equal,
+    from: LabGrading.test_target_fields,
+    schema: invalid,
+    at: /targets/0/op,
+    keyword: enum,
+    patch: [{ op: replace, path: /targets/0/op, value: "!=" }],
+  }
+- {
+    name: target-value-a-string,
+    from: LabGrading.test_target_fields,
+    schema: invalid,
+    at: /targets/0/value,
+    keyword: type,
+    patch: [{ op: replace, path: /targets/0/value, value: x }],
+  }
+- {
+    name: target-metric-uppercase,
+    differs: "sdlab does not check the shape of metric ids",
+    schema: invalid,
+    at: /targets/0/metric,
+    keyword: pattern,
+    patch: [{ op: replace, path: /targets/0/metric, value: DbLoad }],
+  }
+- {
+    name: target-window-missing-to,
+    schema: invalid,
+    at: /targets/0/window,
+    keyword: required,
+    property: to_s,
+    patch: [{ op: remove, path: /targets/0/window/to_s }],
+  }
+- {
+    name: target-unknown-field,
+    schema: invalid,
+    at: /targets/0,
+    keyword: additionalProperties,
+    property: weight,
+    patch: [{ op: add, path: /targets/0/weight, value: 2 }],
+  }
+- {
+    name: rule-predicate-unknown,
+    from: LabGrading.test_predicate_must_be_known,
+    schema: invalid,
+    at: /structural_rules/0/predicate,
+    keyword: enum,
+    patch: [{ op: replace, path: /structural_rules/0/predicate, value: magic }],
+  }
+- {
+    name: rule-without-feedback-pass,
+    from: LabGrading.test_feedback_required_and_ids_unique,
+    schema: invalid,
+    at: /structural_rules/0,
+    keyword: required,
+    property: feedback_pass,
+    patch: [{ op: remove, path: /structural_rules/0/feedback_pass }],
+  }
+- {
+    name: param-unchanged-without-param,
+    differs: "sdlab checks only args.node; argument shapes are new in the contract",
+    schema: invalid,
+    at: /structural_rules/0/args,
+    keyword: required,
+    property: param,
+    patch: [{ op: replace, path: /structural_rules/0/args, value: { node: db } }],
+  }
+- {
+    name: param-range-without-bounds,
+    differs: "sdlab does not check predicate argument shapes; new in the contract",
+    schema: invalid,
+    at: /structural_rules/1/args,
+    keyword: anyOf,
+    patch:
+      [
+        {
+          op: replace,
+          path: /structural_rules/1/args,
+          value: { node: cache, param: capacity_pct },
+        },
+      ],
+  }
+- {
+    name: param-range-unknown-arg,
+    differs: "sdlab does not check predicate argument shapes; new in the contract",
+    schema: invalid,
+    at: /structural_rules/1/args,
+    keyword: additionalProperties,
+    property: limit,
+    patch: [{ op: add, path: /structural_rules/1/args/limit, value: 3 }],
+  }
+- {
+    name: count-le-negative-max,
+    differs: "sdlab does not check predicate argument shapes; new in the contract",
+    schema: invalid,
+    at: /structural_rules/1/args/max,
+    keyword: minimum,
+    patch:
+      [
+        {
+          op: replace,
+          path: /structural_rules/1,
+          value:
+            {
+              id: few,
+              predicate: count-le,
+              args: { type: cache, max: -1 },
+              feedback_pass: ok,
+              feedback_fail: gagal,
+            },
+        },
+      ],
+  }
+- {
+    name: has-edge-without-to,
+    differs: "sdlab does not check predicate argument shapes; new in the contract",
+    schema: invalid,
+    at: /structural_rules/1/args,
+    keyword: required,
+    property: to,
+    patch:
+      [
+        {
+          op: replace,
+          path: /structural_rules/1,
+          value:
+            {
+              id: edge,
+              predicate: has-edge,
+              args: { from: app },
+              feedback_pass: ok,
+              feedback_fail: gagal,
+            },
+        },
+      ],
+  }
+- {
+    name: hints-cover-two-tiers-only,
+    from: LabGrading.test_hints_cover_three_tiers,
+    schema: invalid,
+    at: /hints,
+    keyword: contains,
+    patch: [{ op: remove, path: /hints/2 }],
+  }
+- {
+    name: hint-tier-4,
+    schema: invalid,
+    at: /hints/0/tier,
+    keyword: enum,
+    patch: [{ op: replace, path: /hints/0/tier, value: 4 }],
+  }
+- {
+    name: hint-without-text,
+    schema: invalid,
+    at: /hints/0,
+    keyword: required,
+    property: text,
+    patch: [{ op: remove, path: /hints/0/text }],
+  }
+
+# ---------------------------------------------------------------- solutions (sdlab LabSolutions)
+- {
+    name: wrong-answer-without-reason,
+    from: LabSolutions.test_wrong_answers_required_with_reason,
+    schema: invalid,
+    at: /wrong_answers/0,
+    keyword: required,
+    property: reason,
+    patch: [{ op: remove, path: /wrong_answers/0/reason }],
+  }
+- {
+    name: wrong-answer-without-edits,
+    schema: invalid,
+    at: /wrong_answers/0,
+    keyword: required,
+    property: edits,
+    patch: [{ op: remove, path: /wrong_answers/0/edits }],
+  }
+- {
+    name: no-brute-force-entry-and-no-waiver,
+    from: LabSolutions.test_brute_force_entry_or_waiver,
+    schema: invalid,
+    at: "",
+    keyword: anyOf,
+    patch: [{ op: remove, path: /wrong_answers/1/brute_force }],
+  }
+- {
+    name: edit-without-value,
+    schema: invalid,
+    at: /reference_solution/0,
+    keyword: required,
+    property: value,
+    patch: [{ op: remove, path: /reference_solution/0/value }],
+  }
+- {
+    name: edit-value-null,
+    schema: invalid,
+    at: /reference_solution/0/value,
+    keyword: type,
+    patch: [{ op: replace, path: /reference_solution/0/value, value: null }],
+  }
+- {
+    name: sources-a-string,
+    from: LabSources.test_sources_must_be_in_the_registry_and_not_map_only,
+    schema: invalid,
+    at: /sources,
+    keyword: type,
+    patch: [{ op: replace, path: /sources, value: blog }],
+  }
+- {
+    name: case-without-story,
+    schema: invalid,
+    at: /case,
+    keyword: required,
+    property: story,
+    patch: [{ op: add, path: /case, value: { symptom: "Lambat." } }],
+  }
+- {
+    name: case-timeline-without-caption,
+    schema: invalid,
+    at: /case/timeline/0,
+    keyword: required,
+    property: caption,
+    patch: [{ op: add, path: /case, value: { story: "Cerita.", timeline: [{ at_s: 10 }] } }],
+  }
+- {
+    name: play-speed-zero,
+    schema: invalid,
+    at: /play/speeds/0,
+    keyword: exclusiveMinimum,
+    patch: [{ op: add, path: /play, value: { speeds: [0, 10] } }],
+  }
+- {
+    name: play-unknown-field,
+    schema: invalid,
+    at: /play,
+    keyword: additionalProperties,
+    property: autoplay,
+    patch: [{ op: add, path: /play, value: { autoplay: true } }],
+  }
+
+# ---------------------------------------------------------------- schema-valid, rejected by a validator rule (cannot be expressed in JSON Schema)
+- {
+    name: edge-to-unknown-node,
+    from: LabTopology.test_edge_to_unknown_node,
+    schema: valid,
+    sdlab: "edge refers to an unknown node (C13)",
+    patch: [{ op: add, path: /topology/edges/-, value: [cache, ghost] }],
+  }
+- {
+    name: duplicate-node-id,
+    from: LabTopology.test_duplicate_and_bad_node_ids,
+    schema: valid,
+    sdlab: "duplicate node id",
+    patch: [{ op: add, path: /topology/nodes/-, value: { id: db, type: db } }],
+  }
+- {
+    name: traffic-schedule-not-sorted,
+    from: LabTopology.test_traffic_rules,
+    schema: valid,
+    sdlab: "traffic schedule must be sorted by at_s",
+    patch:
+      [
+        {
+          op: replace,
+          path: /traffic/schedule,
+          value: [{ at_s: 120, rate: 160 }, { at_s: 0, rate: 80 }],
+        },
+      ],
+  }
+- {
+    name: window-from-after-to,
+    from: LabGrading.test_target_fields,
+    schema: valid,
+    sdlab: "from_s < to_s",
+    patch: [{ op: replace, path: /targets/0/window, value: { from_s: 9, to_s: 1 } }],
+  }
+- {
+    name: allowed-edit-min-above-max,
+    from: LabModes.test_allowed_edit_checks,
+    schema: valid,
+    sdlab: "numeric min <= max",
+    patch: [{ op: replace, path: /allowed_edits/0/min, value: 99 }],
+  }
+- {
+    name: allowed-edit-unknown-param,
+    from: LabModes.test_allowed_edit_checks,
+    schema: valid,
+    sdlab: "has no initial param",
+    patch:
+      [{ op: add, path: /allowed_edits/-, value: { node: cache, param: ghost, min: 0, max: 1 } }],
+  }
+- {
+    name: allowed-edit-listed-twice,
+    schema: valid,
+    sdlab: "twice",
+    patch:
+      [{ op: add, path: /allowed_edits/-, value: { node: cache, param: ttl_s, min: 0, max: 100 } }],
+  }
+- {
+    name: duplicate-grading-rule-id,
+    from: LabGrading.test_feedback_required_and_ids_unique,
+    schema: valid,
+    sdlab: "duplicate grading rule id",
+    patch: [{ op: replace, path: /structural_rules/0/id, value: db-load }],
+  }
+- {
+    name: reference-edit-not-allowed,
+    from: LabSolutions.test_reference_edit_must_be_allowed,
+    schema: valid,
+    sdlab: "is not in allowed_edits",
+    patch: [{ op: add, path: /reference_solution/-, value: { node: db, param: pool, value: 8 } }],
+  }
+- {
+    name: reference-value-out-of-range,
+    from: LabSolutions.test_reference_value_must_be_in_range,
+    schema: valid,
+    sdlab: "outside its allowed range",
+    patch: [{ op: replace, path: /reference_solution/1/value, value: 9999 }],
+  }
+- {
+    name: reference-breaks-a-structural-rule,
+    from: LabSolutions.test_reference_must_not_break_structural_rules,
+    schema: valid,
+    sdlab: "breaks rule",
+    patch: [{ op: replace, path: /reference_solution/0/value, value: 40 }],
+  }
+- {
+    name: latency-target-without-error-target,
+    from: LabGrading.test_latency_target_needs_an_error_or_goodput_target,
+    schema: valid,
+    sdlab: "a latency target must be paired (C12)",
+    patch:
+      [
+        { op: replace, path: /targets/0/metric, value: latency_p99_ms },
+        { op: remove, path: /targets/1 },
+      ],
+  }
+- {
+    name: goal-contains-the-reference-value,
+    from: LabAntiLeak.test_goal_must_not_contain_a_reference_value,
+    schema: valid,
+    sdlab: "anti-leak (C08): goal contains the reference value",
+    patch:
+      [
+        {
+          op: replace,
+          path: /goal,
+          value: "Pasang cache dengan TTL 300 detik untuk menurunkan beban.",
+        },
+      ],
+  }
+- {
+    name: rule-refers-to-unknown-node,
+    schema: valid,
+    sdlab: "unknown node",
+    patch: [{ op: replace, path: /structural_rules/0/args/node, value: ghost }],
+  }
+
+# ---------------------------------------------------------------- numeric edit values (sdlab Malformed.test_edit_values_must_be_numbers)
+- {
+    name: reference-value-true,
+    from: Malformed.test_edit_values_must_be_numbers,
+    schema: invalid,
+    at: /reference_solution/0/value,
+    keyword: type,
+    patch: [{ op: replace, path: /reference_solution/0/value, value: true }],
+  }
+- {
+    name: reference-value-text,
+    from: Malformed.test_edit_values_must_be_numbers,
+    schema: invalid,
+    at: /reference_solution/0/value,
+    keyword: type,
+    patch: [{ op: replace, path: /reference_solution/0/value, value: abc }],
+  }
+- {
+    name: reference-value-empty-text,
+    from: Malformed.test_edit_values_must_be_numbers,
+    schema: invalid,
+    at: /reference_solution/0/value,
+    keyword: type,
+    patch: [{ op: replace, path: /reference_solution/0/value, value: "" }],
+  }
+- {
+    name: reference-value-a-list,
+    from: Malformed.test_edit_values_must_be_numbers,
+    schema: invalid,
+    at: /reference_solution/0/value,
+    keyword: type,
+    patch: [{ op: replace, path: /reference_solution/0/value, value: [1] }],
+  }
+- {
+    name: wrong-answer-edit-value-text,
+    from: Malformed.test_edit_values_must_be_numbers,
+    schema: invalid,
+    at: /wrong_answers/0/edits/0/value,
+    keyword: type,
+    patch: [{ op: replace, path: /wrong_answers/0/edits/0/value, value: abc }],
+  }
+- {
+    name: build-mode-accepts-text-edit-values,
+    schema: valid,
+    patch:
+      [
+        { op: replace, path: /mode, value: build },
+        { op: remove, path: /allowed_edits },
+        { op: add, path: /palette, value: [{ type: cache, max: 1 }] },
+        { op: replace, path: /reference_solution/0/value, value: look-aside },
+      ],
+  }
+
+# ---------------------------------------------------------------- more structure from sdlab tests
+- {
+    name: unknown-field-in-hint,
+    from: Malformed.test_unknown_fields_are_errors,
+    schema: invalid,
+    at: /hints/0,
+    keyword: additionalProperties,
+    property: note,
+    patch: [{ op: add, path: /hints/0/note, value: x }],
+  }
+- {
+    name: unknown-field-in-allowed-edit,
+    from: Malformed.test_unknown_fields_are_errors,
+    schema: invalid,
+    at: /allowed_edits/0,
+    keyword: additionalProperties,
+    property: step,
+    patch: [{ op: add, path: /allowed_edits/0/step, value: 5 }],
+  }
+- {
+    name: unknown-field-in-wrong-answer,
+    from: Malformed.test_unknown_fields_are_errors,
+    schema: invalid,
+    at: /wrong_answers/0,
+    keyword: additionalProperties,
+    property: note,
+    patch: [{ op: add, path: /wrong_answers/0/note, value: x }],
+  }
+- {
+    name: allowed-edits-not-a-list,
+    from: Malformed.test_no_traceback,
+    schema: invalid,
+    at: /allowed_edits,
+    keyword: type,
+    patch: [{ op: replace, path: /allowed_edits, value: 5 }],
+  }
+- {
+    name: targets-not-a-list,
+    differs: "sdlab silently ignores a targets value that is not a list",
+    from: Malformed.test_no_traceback,
+    schema: invalid,
+    at: /targets,
+    keyword: type,
+    patch: [{ op: replace, path: /targets, value: { a: 1 } }],
+  }
+- {
+    name: hints-not-a-list,
+    from: Malformed.test_no_traceback,
+    schema: invalid,
+    at: /hints,
+    keyword: type,
+    patch: [{ op: replace, path: /hints, value: text }],
+  }
+- {
+    name: topology-not-a-mapping,
+    from: Malformed.test_no_traceback,
+    schema: invalid,
+    at: /topology,
+    keyword: type,
+    patch: [{ op: replace, path: /topology, value: [a, b] }],
+  }
+- {
+    name: traffic-not-a-mapping,
+    from: Malformed.test_no_traceback,
+    schema: invalid,
+    at: /traffic,
+    keyword: type,
+    patch: [{ op: replace, path: /traffic, value: 80 }],
+  }
+- {
+    name: wrong-answer-identical-to-reference,
+    from: LabSolutions.test_duplicate_allowed_edit_and_identical_wrong_answer,
+    schema: valid,
+    sdlab: "identical to the reference",
+    patch:
+      [
+        {
+          op: replace,
+          path: /wrong_answers/0/edits,
+          value:
+            [
+              { node: cache, param: capacity_pct, value: 20 },
+              { node: cache, param: ttl_s, value: 300 },
+            ],
+        },
+      ],
+  }
+- {
+    name: wrong-answer-edit-outside-allowed-edits,
+    from: LabSolutions.test_wrong_answer_edits_checked_against_allowed_edits,
+    schema: valid,
+    sdlab: "wrong_answers[0]",
+    patch: [{ op: replace, path: /wrong_answers/0/edits/0/value, value: 99999 }],
+  }
+
+# ---------------------------------------------------------------- limits chosen in 0.1.0 (a wider limit is a minor change, a narrower one a major)
+- {
+    name: rate-above-500,
+    differs: "sdlab has no upper bounds; PLAN 9.4 caps lab rates at 500 requests/s",
+    schema: invalid,
+    at: /traffic/schedule/0/rate,
+    keyword: maximum,
+    patch: [{ op: replace, path: /traffic/schedule/0/rate, value: 501 }],
+  }
+- {
+    name: keys-above-a-million,
+    differs: "sdlab has no upper bounds",
+    schema: invalid,
+    at: /traffic/keys,
+    keyword: maximum,
+    patch: [{ op: replace, path: /traffic/keys, value: 1000001 }],
+  }
+- {
+    name: skew-above-3,
+    differs: "sdlab has no upper bounds",
+    schema: invalid,
+    at: /traffic/skew,
+    keyword: maximum,
+    patch: [{ op: replace, path: /traffic/skew, value: 4 }],
+  }
+- {
+    name: duration-above-120-minutes,
+    differs: "sdlab has no upper bound",
+    schema: invalid,
+    at: /duration_min,
+    keyword: maximum,
+    patch: [{ op: replace, path: /duration_min, value: 1000000000 }],
+  }
+- {
+    name: schedule-time-above-an-hour,
+    differs: "sdlab has no upper bound",
+    schema: invalid,
+    at: /traffic/schedule/1/at_s,
+    keyword: maximum,
+    patch: [{ op: replace, path: /traffic/schedule/1/at_s, value: 100000 }],
+  }
+- {
+    name: window-end-above-an-hour,
+    differs: "sdlab has no upper bound",
+    schema: invalid,
+    at: /targets/0/window/to_s,
+    keyword: maximum,
+    patch: [{ op: replace, path: /targets/0/window/to_s, value: 100000 }],
+  }
+
+# ---------------------------------------------------------------- the schema is stricter than sdlab's validator today (sdlab accepts these)
+- {
+    name: unknown-field-in-topology,
+    differs: "sdlab does not check unknown topology fields",
+    schema: invalid,
+    at: /topology,
+    keyword: additionalProperties,
+    property: layout,
+    patch: [{ op: add, path: /topology/layout, value: grid }],
+  }
+- {
+    name: unknown-field-in-edge-mapping,
+    differs: "sdlab does not check unknown edge fields",
+    schema: invalid,
+    at: /topology/edges/0,
+    keyword: oneOf,
+    patch: [{ op: replace, path: /topology/edges/0, value: { from: users, to: app, weight: 2 } }],
+  }
+- {
+    name: unknown-field-in-schedule-item,
+    differs: "sdlab does not check unknown schedule fields",
+    schema: invalid,
+    at: /traffic/schedule/0,
+    keyword: additionalProperties,
+    property: burst,
+    patch: [{ op: add, path: /traffic/schedule/0/burst, value: 3 }],
+  }
+- {
+    name: unknown-field-in-edit,
+    differs: "sdlab does not check unknown fields in edits",
+    schema: invalid,
+    at: /reference_solution/0,
+    keyword: additionalProperties,
+    property: unit,
+    patch: [{ op: add, path: /reference_solution/0/unit, value: pct }],
+  }
+- {
+    name: negative-schedule-time,
+    differs: "sdlab does not check the sign of at_s",
+    schema: invalid,
+    at: /traffic/schedule/0/at_s,
+    keyword: minimum,
+    patch: [{ op: replace, path: /traffic/schedule/0/at_s, value: -5 }],
+  }
+- {
+    name: negative-window-start,
+    differs: "sdlab accepts a negative from_s",
+    schema: invalid,
+    at: /targets/0/window/from_s,
+    keyword: minimum,
+    patch: [{ op: replace, path: /targets/0/window/from_s, value: -1 }],
+  }
+- {
+    name: node-type-not-kebab,
+    differs: "sdlab does not check the shape of node types",
+    schema: invalid,
+    at: /topology/nodes/1/type,
+    keyword: pattern,
+    patch: [{ op: replace, path: /topology/nodes/1/type, value: ApiServer }],
+  }
+- {
+    name: concept-id-not-kebab,
+    differs: "sdlab checks the concept against concepts.yaml, not its shape",
+    schema: invalid,
+    at: /concept,
+    keyword: pattern,
+    patch: [{ op: replace, path: /concept, value: Caching_Basics }],
+  }
+- {
+    name: palette-item-without-max,
+    differs: "sdlab checks only the type of a palette item",
+    schema: invalid,
+    at: /palette/0,
+    keyword: required,
+    property: max,
+    patch:
+      [
+        { op: replace, path: /mode, value: build },
+        { op: remove, path: /allowed_edits },
+        { op: add, path: /palette, value: [{ type: cache }] },
+      ],
+  }
+- {
+    name: palette-max-zero,
+    differs: "sdlab checks only the type of a palette item",
+    schema: invalid,
+    at: /palette/0/max,
+    keyword: minimum,
+    patch:
+      [
+        { op: replace, path: /mode, value: build },
+        { op: remove, path: /allowed_edits },
+        { op: add, path: /palette, value: [{ type: cache, max: 0 }] },
+      ],
+  }
+- {
+    name: empty-scenarios-in-tune-mode,
+    differs: "sdlab reads an empty list as absent; the schema forbids the field in tune mode",
+    schema: invalid,
+    at: /scenarios,
+    keyword: false schema,
+    patch: [{ op: add, path: /scenarios, value: [] }],
+  }
+- {
+    name: empty-allowed-edits-in-build-mode,
+    differs: "sdlab reads an empty list as absent; the schema forbids the field in build mode",
+    schema: invalid,
+    at: /allowed_edits,
+    keyword: false schema,
+    patch:
+      [
+        { op: replace, path: /mode, value: build },
+        { op: replace, path: /allowed_edits, value: [] },
+        { op: add, path: /palette, value: [{ type: cache, max: 1 }] },
+      ],
+  }
+- {
+    name: null-target-node,
+    differs: "sdlab treats a null node as absent",
+    schema: invalid,
+    at: /targets/0/node,
+    keyword: type,
+    patch: [{ op: add, path: /targets/0/node, value: null }],
+  }
+- {
+    name: difficulty-written-as-float,
+    differs: "YAML 2.0 is a float in PyYAML and an integer in JavaScript: sdlab rejects it, the schema cannot tell",
+    schema: valid,
+    patch: [{ op: replace, path: /difficulty, value: 2.0 }],
+  }
+
+# ---------------------------------------------------------------- the new case and play fields (S-103)
+- {
+    name: case-observe-unknown-node,
+    differs: "new field from S-103: sdlab does not know `case` yet",
+    schema: valid,
+    note: "a reference to a node that does not exist is a validator rule (RULES.md C13), not schema",
+    patch: [{ op: add, path: /case, value: { story: "Cerita.", observe: [ghost] } }],
+  }
+- {
+    name: case-observe-not-kebab,
+    schema: invalid,
+    at: /case/observe/0,
+    keyword: pattern,
+    patch: [{ op: add, path: /case, value: { story: "Cerita.", observe: [DB] } }],
+  }
+- {
+    name: case-caption-above-an-hour,
+    schema: invalid,
+    at: /case/timeline/0/at_s,
+    keyword: maximum,
+    patch:
+      [
+        {
+          op: add,
+          path: /case,
+          value: { story: "Cerita.", timeline: [{ at_s: 5000, caption: "Lama." }] },
+        },
+      ],
+  }

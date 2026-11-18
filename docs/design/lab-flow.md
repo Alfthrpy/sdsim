@@ -1,6 +1,6 @@
 # Lab flow: case, play, tune, check
 
-Ticket S-103. Status: proposal for owner approval (`review: human`). Motivation: the owner tried the spike C prototype on a phone (2026-11-18) and could not tell what the screen was about: a fixed bar and a chart, no story, nothing happening, no moment of "this is what is broken".
+Ticket S-103. Status: approved by the owner on 2026-11-18 (flow, play one tap after the case, calibration unchanged). Motivation: the owner tried the spike C prototype on a phone (2026-11-18) and could not tell what the screen was about: a fixed bar and a chart, no story, nothing happening, no moment of "this is what is broken".
 
 ## 1. The flow
 
@@ -71,12 +71,12 @@ Proposed additions, to go into S-010 (the schema is not started, so this costs o
 
 | Where | Field | Purpose |
 | --- | --- | --- |
-| lab spec | `scenario.story` | the case text (Indonesian, owned by sdlab) |
-| lab spec | `scenario.symptom` | what the learner sees at baseline, one sentence |
-| lab spec | `scenario.timeline[]` | `{at_s, caption}` captions shown during play at the given simulated time |
-| lab spec | `scenario.observe[]` | what to watch while playing (node ids), highlighted during play |
-| lab spec | `play.speeds` (optional) | default 60x; lets a short lab choose 10x |
-| catalog | metric `node_status` | `ok / strained / failing`, `illustrative`, thresholds from section 2 |
+| lab spec | `case.story` | the case text (Indonesian, owned by sdlab) |
+| lab spec | `case.symptom` | what the learner sees at baseline, one sentence |
+| lab spec | `case.timeline[]` | `{at_s, caption}` captions shown during play at the given simulated time |
+| lab spec | `case.observe[]` | what to watch while playing (node ids), highlighted during play |
+| lab spec | `play.speeds`, `play.default_speed` (optional) | the speeds offered (1, 10, 60 by default) and the one selected first; the UI default is 60x when absent. `default_speed` need not be in `speeds` today: a validator rule will decide (RULES.md) |
+| catalog | metric `node_status` | `ok / strained / failing`, `illustrative`, thresholds from section 2. Not in the schema: it is a derived series defined with the descriptors in S-010b |
 | catalog | recorded series per node and per edge | the list in section 2, so the contract says what a lab can rely on |
 
 Engine: S-021 records the per-node and per-edge series in the result of every run (cheap); S-050 returns the record of seed 1 next to the grading result; no new engine mechanics.
@@ -85,31 +85,34 @@ Engine: S-021 records the per-node and per-edge series in the result of every ru
 
 This is what the caching lab could say, so the owner can judge the flow. All numbers are illustrative until the engine produces them.
 
-> **Warung Kita, jam 19.00.** Toko online kecil ini biasanya melayani 80 permintaan per detik. Mulai pukul 19.00 ada flash sale, dan trafik naik menjadi 240 permintaan per detik. Semua permintaan baca harus ke database, dan database punya 4 koneksi saja.
+> **Warung Kita, jam 19.00.** Toko online kecil ini biasanya melayani 80 permintaan per detik. Mulai pukul 19.00 ada flash sale, dan trafik naik menjadi 160 permintaan per detik. Semua permintaan baca harus ke database, dan database punya 4 koneksi saja.
 >
-> **Gejala.** Halaman produk makin lambat, lalu mulai gagal.
+> **Gejala.** Halaman produk makin lambat.
 >
 > **Tujuan.** Jaga beban database di bawah 60% tanpa menambah koneksi.
 >
-> *Putar kondisi awal:* menit 2 trafik naik, menit 3 antrean database menumpuk, menit 4 permintaan mulai timeout.
+> *Putar kondisi awal:* menit 2 trafik naik, menit 3 database sibuk (kuning) dan permintaan menunggu lama.
 >
 > *Atur:* kapasitas cache dan TTL.
 >
 > *Putar lagi:* database tetap hijau; sebagian besar pembacaan dijawab oleh cache.
 
-Questions for `sdlab`: whether the peak of 240 is acceptable (it changes `traffic.schedule` and the calibration of the lab's targets), and who writes the captions.
+Question for `sdlab`: who writes the captions. (The peak of 240 requests/s in the first draft was declined by the owner; the case now uses the lab's own 160.)
 
 ## 7. Plan changes proposed
 
 1. New ticket **S-063a** (UI, 1 session): the play replay (timeline, state colors with labels, captions, scrubber), in the BG1 set; depends on S-061, S-062, S-021, S-050. S-070 depends on it; the BG1 gate (S-071) adds: the owner plays the baseline and sees the database fail or strain.
-2. S-010 gets the scenario fields (section 5) and depends on this ticket.
+2. S-010 gets the `case` and `play` fields (section 5; the first draft called `case` `scenario`, renamed because `scenarios` already names the diagnose-mode injectors) and depends on this ticket.
 3. S-021 records the series in section 2; S-050 returns seed 1's record.
 4. S-063 (sampled tokens) and live mode stay after BG2.
 5. Cost: BG1 goes from 35 to 36 agent sessions, early access from 41 to 42, the total from 80 to 81.
 
-## 8. Not decided here
+## 8. Decided and not decided
 
-- Whether play is on by default or one tap away (this design says one tap, after the case, before tune).
+Decided by the owner (2026-11-18): the flow, including playing the baseline first; play is one tap after the case, not automatic; the peak stays at the lab's own calibration (no 240 requests/s), so the caching baseline shows an amber database, not a red one. Section 3 describes the alternative that was declined; section 6 was rewritten for the lab's own calibration (160 requests/s, strained database).
+
+Not decided:
+
 - Final thresholds for node states (they are illustrative; they will be tuned when the engine produces real series, S-070).
 - Whether the case text lives in the lab spec only or also as a separate "case" page in the content bundle (S-100); this design puts it in the spec.
 - A desktop layout; the flow is the same, with more room.
