@@ -30,12 +30,18 @@ Second half of PLAN S-003 (split when S-003 was claimed, because the ticket did 
 
 ## Done criteria
 
-- [ ] The golden hash matches between Node and Chromium
-- [ ] A5 and A6 are measured and recorded in `docs/spikes/A.md`, with the machine and browser versions
-- [ ] The extra oracles in task 5 pass
-- [ ] Playwright is added as a dependency by this ticket and noted in it
-- [ ] `python scripts/validate.py` passes; lint, typecheck, tests pass
+- [x] The golden hash matches between Node and Chromium (both styles; `npm run test:browser`, CI job `browser`)
+- [x] A5 and A6 are measured and recorded in `docs/spikes/A.md`, with the machine and browser versions
+- [x] The extra oracles in task 5 pass (M/G/1 cv 0.5 and 2, tandem, Little's law, M/M/4 delay probability); the M/M/4 p99 was not done (no closed form used), noted in the spike
+- [x] Playwright 1.65.1 and Vite 8.3.8 added as dev dependencies by this ticket
+- [x] `python scripts/validate.py` passes; lint, typecheck, tests pass
+- [ ] Independent review (code-reviewer) done and findings fixed
 
 ## Notes
 
-(Filled in during the work.)
+- **Finding:** `Math.log` differs in the last bit between Node 24.22 (V8 13.6) and Chromium 159, so the first Chromium run failed the golden hash. PLAN R13 ("both V8, so bit-identical") was wrong across versions. Fix: `packages/engine/src/rng/log.ts` (IEEE basic operations only), ESLint ban on transcendental `Math` functions in the engine, PLAN R13 and engineering.md updated, golden hash now `093382ef`.
+- CDP CPU throttling does not slow Workers, so A5 at 4x is a computed bound, not a measurement (spike note).
+- A1-A6 as defined in the master plan were still not readable; the PLAN 9.4 budgets were used.
+- The Worker bridge is a spike protocol (`packages/engine/browser/`); the real protocol is S-020. `window.sdsim` is typed by `Harness` in `browser/protocol.ts`.
+- The CI job `browser` was added but has not run on GitHub yet; its first run also tests `playwright install --with-deps`.
+- Not measured: the owner's phone (S-008), Firefox and WebKit.

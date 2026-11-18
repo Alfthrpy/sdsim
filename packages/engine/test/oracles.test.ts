@@ -1,5 +1,11 @@
 import { describe, expect, test } from "vitest";
-import { runMMcCallbacks, runMMcProcesses, type MMcConfig, type MMcResult } from "../src/index.ts";
+import {
+  runMMcCallbacks,
+  runMMcProcesses,
+  runTandemProcesses,
+  type MMcConfig,
+  type MMcResult,
+} from "../src/index.ts";
 
 const SEEDS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 const CUSTOMERS = 100_000;
@@ -79,6 +85,51 @@ describe.each(styles)("M/D/1 (Pollaczek-Khinchine), %s", (_name, run) => {
   });
 });
 
+describe.each(styles)("M/G/1 (Pollaczek-Khinchine), %s", (_name, run) => {
+  // PK: W = 1/mu + lambda E[S^2] / (2 (1 - rho)), E[S^2] = (1 + cv^2) / mu^2. Tolerance 10% (PLAN 9.1).
+  test.each([
+    ["erlang4", 0.25],
+    ["hyper2", 4],
+  ] as const)("service %s (cv^2 %s) at rho 0.7: mean within 10%", (service, cv2) => {
+    const mu = 1;
+    const lambda = 0.7;
+    const expected = 1 / mu + (lambda * (1 + cv2)) / (mu * mu) / (2 * (1 - lambda / mu));
+    const xs = pooled((c) => run({ ...c, service }), { lambda, mu, servers: 1, customers: 0 });
+    expect(Math.abs(mean(xs) / expected - 1)).toBeLessThan(0.1);
+  });
+});
+
+describe.each(styles)("M/M/4 delay probability and Little's law, %s", (_name, run) => {
+  test("fraction of customers who wait matches Erlang C within 5%", () => {
+    const lambda = 3.2;
+    let delayed = 0;
+    let total = 0;
+    for (const seed of SEEDS) {
+      const r = run({ lambda, mu: 1, servers: 4, customers: CUSTOMERS, seed });
+      delayed += r.delayed;
+      total += CUSTOMERS;
+    }
+    expect(Math.abs(delayed / total / erlangC(4, lambda) - 1)).toBeLessThan(0.05);
+  });
+
+  test("L = lambda W within 2% on a run that starts and ends empty", () => {
+    const r = run({ lambda: 3.2, mu: 1, servers: 4, customers: CUSTOMERS, seed: 1 });
+    const l = r.areaInSystem / r.endTime; // time-average number in system, from n(t) bookkeeping
+    const arrivalRate = CUSTOMERS / r.endTime;
+    const w = r.sojourns.reduce((sum, x) => sum + x, 0) / CUSTOMERS;
+    expect(Math.abs(l / (arrivalRate * w) - 1)).toBeLessThan(0.02);
+  });
+});
+
+describe("tandem network (Jackson), processes", () => {
+  test("three M/M/1 stations at rho 0.7: mean total time is the sum of the stations, within 5%", () => {
+    const mu = 1;
+    const lambda = 0.7;
+    const xs = pooled((c) => runTandemProcesses(c), { lambda, mu, servers: 1, customers: 0 });
+    expect(Math.abs(mean(xs) / (3 / (mu - lambda)) - 1)).toBeLessThan(0.05);
+  });
+});
+
 describe("determinism", () => {
   const config = { lambda: 0.8, mu: 1, servers: 2, customers: 5_000 };
   test("same seed gives the same event-log hash, different seeds do not", () => {
@@ -92,8 +143,8 @@ describe("determinism", () => {
     expect(runMMcCallbacks(d).logHash).toBe(runMMcProcesses(d).logHash);
   });
   test("golden hash on Node (changes only with a recorded behavior change)", () => {
-    expect(runMMcCallbacks({ ...config, seed: 7 }).logHash).toBe("92b6d220");
-    expect(runMMcProcesses({ ...config, seed: 7 }).logHash).toBe("92b6d220");
+    expect(runMMcCallbacks({ ...config, seed: 7 }).logHash).toBe("093382ef");
+    expect(runMMcProcesses({ ...config, seed: 7 }).logHash).toBe("093382ef");
   });
   test("the two styles are the same model: identical log and sojourns for the same seed", () => {
     const a = runMMcCallbacks({ ...config, seed: 7 });

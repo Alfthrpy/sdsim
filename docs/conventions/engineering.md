@@ -19,8 +19,9 @@ A dependency pointing the other way, or the UI importing the engine directly, is
 ## The engine is pure and deterministic
 
 - No DOM, no wall clock (`Date.now`, `performance.now`), no `Math.random`, no global mutable state.
+- No `Math.log`, `exp`, `pow`, trig or other transcendental functions: their last bit differs between V8 versions (found in spike A: Node 24 vs Chromium 159), which breaks the golden hash. Use basic arithmetic, `Math.sqrt`, or the deterministic functions in `packages/engine/src/rng/`. ESLint enforces this.
 - All randomness comes from named seeded streams, so adding a random draw in one component does not change another component's sequence.
-- Same spec + same seed = same event log, byte for byte, within one JavaScript engine: Node and Chromium (both V8) must give the same event-log hash. Firefox and WebKit are compared statistically, not bitwise (PLAN R13). The event-log hash is the determinism test.
+- Same spec + same seed = same event log, byte for byte, within one JavaScript engine: Node and Chromium must give the same event-log hash (tested in CI). Firefox and WebKit are compared statistically, not bitwise (PLAN R13). The event-log hash is the determinism test.
 - Time is simulated time. Snapshots for the UI are sampled; the UI never drives the simulation clock.
 
 ## Honesty labels
