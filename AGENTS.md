@@ -78,9 +78,15 @@ A reviewer must **not** be the same subagent that did the work. Give it the list
 
 ## Commands
 
-The code toolchain is chosen in the bootstrap ticket (see `docs/PLAN.md`); this section is updated by that ticket. Today only the ticket tooling exists:
+Toolchain: Node 24, TypeScript 6.0.3, npm workspaces, Vitest, ESLint, Prettier (ADR 0004).
 
 ```bash
+npm ci                                # install exact pinned dependencies
+npm run lint                          # ESLint: engine purity bans, layer boundaries
+npm run format                        # Prettier check (code and config; not Markdown)
+npm run typecheck                     # tsc per package
+npm test                              # Vitest
+
 pip install pyyaml
 python scripts/validate.py            # validate tickets
 python -m unittest discover tests     # tests for the ticket validator
