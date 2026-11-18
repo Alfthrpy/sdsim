@@ -84,7 +84,12 @@ export function TopologySvg({ dbLoad, hit, onSelect }: Props) {
             >
               {n.label}
             </text>
-            {n.id === "db" && <Bar x={n.x + 10} y={n.y + 36} width={120} value={dbLoad} />}
+            {n.id === "db" && <Bar x={n.x + 10} y={n.y + 32} width={120} value={dbLoad} />}
+            {n.id === "db" && (
+              <text x={n.x + 70} y={n.y + 52} textAnchor="middle" fontSize={12} fill="#475569">
+                {Math.round(dbLoad * 100)}% · {t.illustrative}
+              </text>
+            )}
             {n.id === "cache" && (
               <text x={n.x + 70} y={n.y + 46} textAnchor="middle" fontSize={12} fill="#475569">
                 {t.hit} {Math.round(hit * 100)}% · {t.illustrative}

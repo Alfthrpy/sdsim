@@ -65,7 +65,12 @@ export function TopologyFlow({ dbLoad, hit, onSelect }: Props) {
       id: "db",
       type: "box",
       position: { x: 210, y: 190 },
-      data: { label: t.nodes.db, sub: `${Math.round(dbLoad * 100)}%`, tappable: true, onSelect },
+      data: {
+        label: t.nodes.db,
+        sub: `${Math.round(dbLoad * 100)}% · ${t.illustrative}`,
+        tappable: true,
+        onSelect,
+      },
     },
   ];
   const edges: Edge[] = [
@@ -83,6 +88,7 @@ export function TopologyFlow({ dbLoad, hit, onSelect }: Props) {
         nodesDraggable={false}
         nodesConnectable={false}
         edgesFocusable={false}
+        nodesFocusable={false}
         panOnDrag={false}
         zoomOnPinch={false}
         zoomOnScroll={false}

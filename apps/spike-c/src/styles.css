@@ -139,8 +139,26 @@ header p {
   font: inherit;
 }
 .sheet-open {
-  padding-bottom: 340px;
+  padding-bottom: 310px;
 }
 .flow-node .react-flow__handle {
   opacity: 0;
+}
+
+.caption {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: #334155;
+}
+.key {
+  display: inline-block;
+  width: 14px;
+  height: 3px;
+  vertical-align: middle;
+}
+.key.blue {
+  background: #2563eb;
+}
+.key.red {
+  background: #dc2626;
 }

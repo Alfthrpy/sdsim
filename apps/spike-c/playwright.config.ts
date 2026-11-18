@@ -7,7 +7,7 @@ export default defineConfig({
   workers: 1,
   reporter: [["list"]],
   use: {
-    baseURL: "http://localhost:5174",
+    baseURL: "http://127.0.0.1:5175",
     browserName: "chromium",
     viewport: { width: 360, height: 800 },
     deviceScaleFactor: 3,
@@ -15,8 +15,8 @@ export default defineConfig({
     hasTouch: true,
   },
   webServer: {
-    command: "npx vite build && npx vite preview",
-    url: "http://localhost:5174",
+    command: "npx vite build && npx vite preview --host 127.0.0.1 --port 5175 --strictPort",
+    url: "http://127.0.0.1:5175",
     reuseExistingServer: false,
     cwd: import.meta.dirname,
     timeout: 120_000,

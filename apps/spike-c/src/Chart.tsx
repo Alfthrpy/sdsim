@@ -21,7 +21,7 @@ export function Chart({ series }: { series: Series }) {
         axes: [
           { size: 28, font: "11px system-ui", values: (_u, v) => v.map((x) => `${x}s`) },
           {
-            size: 36,
+            size: 46,
             font: "11px system-ui",
             values: (_u, v) => v.map((x) => `${Math.round(x * 100)}%`),
           },
@@ -52,5 +52,13 @@ export function Chart({ series }: { series: Series }) {
     plot.current?.setData([series.t, series.util, series.t.map(() => TARGET)]);
   }, [series]);
 
-  return <div ref={host} className="chart" aria-label={text.chartTitle} role="img" />;
+  return (
+    <>
+      <div ref={host} className="chart" aria-label={text.chartTitle} role="img" />
+      <p className="caption">
+        <span className="key blue" /> {text.chartTitle} · <b>{text.illustrative}</b> ·{" "}
+        <span className="key red" /> {text.target}
+      </p>
+    </>
+  );
 }

@@ -1,4 +1,4 @@
-import { lazy, Suspense, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { Chart } from "./Chart.tsx";
 import { simulate, windowMean, type Params } from "./model.ts";
 import { Sheet } from "./Sheet.tsx";
@@ -22,6 +22,14 @@ export function App() {
   const series = useMemo(() => simulate(params), [params]);
   const dbLoad = windowMean(series);
   const hit = series.hit[series.hit.length - 1] as number;
+
+  useEffect(() => {
+    // With the sheet open the chart must stay in view above it: scroll to the bottom of the page.
+    if (open)
+      requestAnimationFrame(() =>
+        window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" }),
+      );
+  }, [open]);
 
   const pick = (v: Variant) => {
     location.hash = v;

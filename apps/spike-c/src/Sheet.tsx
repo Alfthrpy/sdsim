@@ -12,6 +12,7 @@ interface Props {
 
 export function Sheet({ params, onChange, dbLoad, open, onToggle }: Props) {
   const startY = useRef<number | null>(null);
+  const dragged = useRef(false);
   const [dragging, setDragging] = useState(false);
   const dbOk = dbLoad <= TARGET;
   const memOk = params.capacityPct <= MEMORY_LIMIT_PCT;
@@ -29,18 +30,24 @@ export function Sheet({ params, onChange, dbLoad, open, onToggle }: Props) {
           const dy = startY.current === null ? 0 : e.clientY - startY.current;
           startY.current = null;
           setDragging(false);
-          if (Math.abs(dy) < 8) onToggle(!open);
-          else onToggle(dy < 0);
+          // A drag decides open or closed here and swallows the click that follows it;
+          // a tap (or Enter / Space / a screen reader's activate) arrives as a click.
+          dragged.current = Math.abs(dy) >= 8;
+          if (dragged.current) onToggle(dy < 0);
+        }}
+        onClick={() => {
+          if (dragged.current) dragged.current = false;
+          else onToggle(!open);
         }}
         onPointerCancel={() => setDragging(false)}
       >
         <span className="grip" data-dragging={dragging} />
         <span className="summary">
-          <Check ok={dbOk} label={`${t.dbLoad} ${Math.round(dbLoad * 100)}%`} />
+          <Check ok={dbOk} label={`${t.dbLoad} ${Math.round(dbLoad * 100)}% (${t.illustrative})`} />
           <Check ok={memOk} label={t.memory} />
         </span>
       </button>
-      <div className="controls">
+      <div className="controls" inert={!open}>
         <label>
           <span>
             {t.capacity}: <b>{params.capacityPct}</b>
