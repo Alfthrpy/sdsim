@@ -78,4 +78,4 @@ Limits: one machine and no phone (S-008); the model in the Worker is M/M/4, not 
 - Stream seeds are a 32-bit FNV-1a hash of the length-prefixed key; two different triples can still collide by chance, and pure-rand seeds xoroshiro128+ from a 32-bit integer.
 - A process that throws while holding a server leaks it; the contract is documented on `Resource.release`, with no try/finally in the runtime.
 - `bench/bench.ts` and `measure.spec.ts` are scripts, not the perf tests of PLAN 9.4 (no assertions, not in CI).
-- The CI job `browser` has not run on GitHub yet.
+- The CI job `browser` ran green on GitHub (PR #6).

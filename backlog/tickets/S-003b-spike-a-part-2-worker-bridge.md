@@ -5,7 +5,7 @@ milestone: S0
 type: spike
 owner: agent
 review: agent
-status: review
+status: done
 priority: high
 depends_on: [S-003]
 estimate: 1
@@ -39,7 +39,7 @@ Second half of PLAN S-003 (split when S-003 was claimed, because the ticket did 
 - [x] `python scripts/validate.py` passes; lint, typecheck, tests pass
 - [x] Independent review (code-reviewer) done and findings fixed (see Notes)
 - [ ] Task 6, the comparison of the two styles on a lab-shaped model, is **not done**: it needs the caching lab (S-070); recorded there as an input, not met here
-- [ ] CI job `browser` verified green on GitHub (first run is this PR)
+- [x] CI job `browser` verified green on GitHub (PR #6; Chromium on the ubuntu runner matches the Node golden hashes)
 
 ## Notes
 
