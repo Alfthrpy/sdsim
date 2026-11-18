@@ -259,9 +259,9 @@ The Unit 0 lab is cheap after BG1: under OD-5 it needs only components already i
 
 ### 6.3 Beta slice: the minimal ticket set
 
-BG1 needs exactly: S-001, S-002, S-003, S-005, S-006, S-007\*, S-008\*, S-009\*, S-010, S-010b, S-013, S-015, S-020, S-021, S-022, S-023a, S-024, S-025a, S-040, S-050, S-051, S-060, S-061, S-062, S-068, S-070, S-100, S-101, S-102, S-071\* (\* = owner). That is **35 agent sessions** plus 4 owner tickets (S-010's two sessions are now S-010 and S-010b; S-015 is new; S-102 is in because OD-10 is yes).
+BG1 needs exactly: S-001, S-002, S-003, S-005, S-006, S-007\*, S-008\*, S-009\*, S-010, S-010b, S-013, S-015, S-020, S-021, S-022, S-023a, S-024, S-025a, S-040, S-050, S-051, S-060, S-061, S-062, S-068, S-063a, S-070, S-100, S-101, S-102, S-071\* (\* = owner). That is **36 agent sessions** plus 4 owner tickets (S-010's two sessions are now S-010 and S-010b; S-015 is new; S-102 is in because OD-10 is yes).
 
-BG2 adds: S-011, S-012, S-052, S-053, S-030a, S-080: **6 agent sessions**, plus `sdlab` work (section 10). Early access (BG1 + BG2) is **41 agent sessions**.
+BG2 adds: S-011, S-012, S-052, S-053, S-030a, S-080: **6 agent sessions**, plus `sdlab` work (section 10). Early access (BG1 + BG2) is **42 agent sessions**.
 
 LG adds: S-016, S-017, S-018, S-019, S-072: **5 agent sessions**. None of them is needed for early access.
 
@@ -282,13 +282,13 @@ LG adds: S-016, S-017, S-018, S-019, S-072: **5 agent sessions**. None of them i
 | --- | --- | --- | --- | --- | --- |
 | **S0 Bootstrap & spikes** | Plan approved; OD-1 remote created (or work proceeds locally with PRs queued) | Toolchain and CI (S-001), `sdlab:` deps (S-002), spike A kernel and measurements (S-003), spike C mobile prototype (S-005), spike D (S-006), owner measurements (S-008) | **SG0 (S-007)**: GO when A1-A3 pass and A5 or its precompute fallback works (MP 9). Canvas choice recorded; build vs adopt recorded; D8/D11 confirmed. Recorded as an ADR | OD-1, OD-6, OD-7, OD-8 | 7 |
 | **S1 Contract v0** | S-001 done | JSON Schema for lab specs, component descriptor format, conformance fixtures, `id.yaml` v0, lab matrix (the generated catalog and the first release move to S-010b in S2, because the catalog is built from components, ADR 0003 #1) | the real `caching-basics/lab.yaml` (with `keys`/`skew` under `traffic`) validates against the schema; every valid and invalid fixture from `sdlab/tests/test_labs.py` that concerns structure gets the same verdict from Ajv; owner approved the lab list (S-011) | OD-4 | 3 |
-| **S2 Caching vertical slice (BG1)** | SG0 GO; S-010 done | Process runtime and `docs/api.md` (S-015), generated catalog and `contract-v0.1.0` (S-010b), engine run control, metrics, service node, client (basic), cache, db (pool), validation suite, lab runtime, lab CI checker, web shell, tune UI, charts, result view, content bundle, quiz player (lesson view if OD-10) | **BG1 (S-071)**: (1) caching lab: baseline fails ≥ 9/10 seeds, reference passes 10/10 with MP 6.4 margins, both wrong answers fail ≥ 9/10; (2) V1 (M/M/1, M/M/4, M/D/1, M/G/1, fan-out), V2, V4(d), V6, V7 green in CI; (3) on the owner's phone: no horizontal scroll at 360 px, every control ≥ 44 px, grading of the caching lab finishes in ≤ 5 s with a progress bar, the owner reaches a pass without pinch-zoom; (4) the owner finishes the caching-basics quiz (all 5 question types render and score); (5) lab page JS ≤ 300 KB gzip; (6) owner findings recorded in S-071 Notes | — (OD-2, OD-3, OD-10 decided) | 27 (incl. S-052 if done early; 26 without) |
+| **S2 Caching vertical slice (BG1)** | SG0 GO; S-010 done | Process runtime and `docs/api.md` (S-015), generated catalog and `contract-v0.1.0` (S-010b), engine run control, metrics, service node, client (basic), cache, db (pool), validation suite, lab runtime, lab CI checker, web shell, tune UI, charts, result view, content bundle, quiz player (lesson view if OD-10) | **BG1 (S-071)**: (1) caching lab: baseline fails ≥ 9/10 seeds, reference passes 10/10 with MP 6.4 margins, both wrong answers fail ≥ 9/10; (2) V1 (M/M/1, M/M/4, M/D/1, M/G/1, fan-out), V2, V4(d), V6, V7 green in CI; (3) on the owner's phone: no horizontal scroll at 360 px, every control ≥ 44 px, grading of the caching lab finishes in ≤ 5 s with a progress bar, the owner reaches a pass without pinch-zoom; (3b) the owner plays the baseline of the caching lab, sees the database strain or fail, scrubs the timeline and plays again after an edit; (4) the owner finishes the caching-basics quiz (all 5 question types render and score); (5) lab page JS ≤ 300 KB gzip; (6) owner findings recorded in S-071 Notes | — (OD-2, OD-3, OD-10 decided) | 27 (incl. S-052 if done early; 26 without) |
 | **BG2 Unit 0 lab** (milestone label S4, done before S3) | BG1 passed; the owner has written the Unit 0 lab spec in sdlab (ADR 0003 #9) | Released contract and CLI, drift check running lab CI, traffic-spike/cache-flush scenarios, Unit 0 engine needs | `sim-v0.x` tarball runs in `sdlab` CI; `sdlab` lab CI green for the caching lab and the Unit 0 lab at the pinned CLI; the owner runs the Unit 0 lab on a phone. **Early access reached** | none | 4 (S-012, S-053, S-030a, S-080); S-011 and S-052 are counted in S1/S2 |
 | **LG Library gate** (ADR 0003) | BG2 done (S-016 and S-017 may start after BG1 on a free track) | G3 queue + worker (minimal), sandbox CLI and HTML report, G4 external rate limiter in `sandbox/`, sandbox dev page, contract 1.0.0 | G1-G4 run on the same engine; same seed gives the same hash; **no diff in `packages/engine` between the G1 commit and the G4 commit** other than bug fixes recorded in the CHANGELOG; G4 uses only public entry points (lint green); `docs/api.md` matches the exports; `contract-v1.0.0` tagged with a migration note | owner approves the freeze (S-072, `review: human`) | 5 |
 | **S3 Engine complete & validated** | LG done | Client retries/backoff/jitter/budget/idempotency key, DB replicas and lag, LB, queue and worker, rate limiter/CDN/object storage/external dependency/DNS, circuit breaker, remaining scenarios, partitions and quorum, V4(a) (with the spike B question), V4(b), V5, V10, final limitations statement | Every `modeled` catalog entry names a passing V1/V3/V4/V10 check (S05 green); V1-V7 and V10 green; model-reviewer has no open finding on any `docs/model/<id>.md`; L16 label decided (modeled if V4(a) passes in ≥ 8/10 seeds, else illustrative) | none new | 15 |
 | **S4 Labs per unit** | S3 component tickets the unit needs are done; the unit's lab specs exist in sdlab | Engine support per unit in M4 order: Unit 1 (S-081), Unit 2 (S-082), Unit 6 (S-083), Unit 3 (S-084), Unit 4 (S-085), Unit 5 (S-086); UI: animation, compare, diagnose, build, i18n/a11y | Per unit: `sdlab` lab CI green at the pinned CLI for every approved lab of the unit; V5 green for those labs. Modes: diagnose two-step grading works; compare uses common random numbers | owner may apply the cut order (MP 8.3) | 14 |
 | **S5 Incidents, QA, release** | All S4 units closed or cut | Incident mode (S-090), QA (S-091), deferred 5-user pilot support (S-093), release (S-092) | SC1-SC5, SC7, SC8 green (S-091 report); SC6 measured in the 5-user pilot before any public beta; `sim-v1.0.0` tagged on the commit `sdlab` P1-064 tested | owner runs the pilot and SG3 | 4 |
-| **Total** | | | | | **80** (+1 optional S-025b; MP: 67). S0 counts S-014 as an eighth session |
+| **Total** | | | | | **81** (+1 optional S-025b; MP: 67). S0 counts S-014 as an eighth session |
 
 ### 7.3 Sessions to each point (OD-9: counted in sessions, not dates)
 
@@ -296,10 +296,10 @@ LG adds: S-016, S-017, S-018, S-019, S-072: **5 agent sessions**. None of them i
 | --- | --- |
 | SG0 | about 8 (S0) plus S-010 and S-011 from S1 |
 | I0 walking skeleton | about 16 (checkpoint below) |
-| BG1 | 35 |
-| BG2 = early access | 41 |
-| LG (contract 1.0.0) | 46 |
-| S3 + S4 + S5 | 80 |
+| BG1 | 36 |
+| BG2 = early access | 42 |
+| LG (contract 1.0.0) | 47 |
+| S3 + S4 + S5 | 81 |
 
 With two tracks, wall-clock time is roughly half the session count when both tracks are active; with an irregular workload no date is promised.
 
@@ -359,7 +359,8 @@ Legend. **Δ**: `=` kept from MP 10.4; `C` changed; `A` added; `D` dropped. **Sl
 | S-061 | Topology view and parameter sheet (tune mode), honesty badges | ui | S-060 | 2 | agent | `packages/ui/{topology,sheet}` | = | B1 |
 | S-062 | Time-series charts and metric cards with target lines (uPlot, 10 Hz); I0 demo page (M/M/c station on the S-020 protocol, oracle value shown) | ui | S-060, S-021, S-022 | 1 | agent | `packages/ui/charts` | = | B1 |
 | S-068 | Grading result view: per-target value vs target, structural rule feedback, mechanism line, tiered hints, debrief rule A4, progress bar | ui | S-061, S-050 | 1 | agent | `packages/ui/result` | A (R19) | B1 |
-| S-070 | Vertical slice: caching lab from sdlab end to end; lab CI and V5 subset for L05; propose recalibration to sdlab if needed | lab | S-023a, S-024, S-025a, S-040, S-051, S-061, S-062, S-068 | 1 | agent | `validation/labs/caching-basics`, Notes | C: deps updated (R8); `sdlab:P1-032` is done | B1 |
+| S-063a | Play replay of the recorded run: timeline with play, pause, speed and scrubber; node states ok / strained / failing with labels; captions from `scenario.timeline`; chart follows the timeline (docs/design/lab-flow.md) | ui | S-061, S-062, S-021, S-050 | 1 | agent | `packages/ui/play` | A (S-103; owner asked for a play mode in the MVP) | B1 |
+| S-070 | Vertical slice: caching lab from sdlab end to end; lab CI and V5 subset for L05; propose recalibration to sdlab if needed | lab | S-023a, S-024, S-025a, S-040, S-051, S-061, S-062, S-068, S-063a | 1 | agent | `validation/labs/caching-basics`, Notes | C: deps updated (R8); `sdlab:P1-032` is done | B1 |
 | S-100 | Content bundle: read a pinned `sdlab` commit (lessons, questions, lab specs), emit JSON for `apps/web`; lock file with the commit | ui | S-060, S-002 | 1 | agent | `apps/web/scripts/bundle.ts`, `apps/web/content.lock` | A (R17) | B1 |
 | S-101 | Quiz player: mcq, multi, order, match, estimate; explanations; concept list; progress in `localStorage` | ui | S-100 | 2 | agent | `packages/ui/quiz`, `apps/web` routes | A (R17) | B1 |
 | S-102 | Lesson view: Markdown with `[^id]` source markers resolved from the registry | ui | S-100 | 1 | agent | `packages/ui/lesson` | A (R17; OD-10 yes; first to cut) | B1 |
@@ -414,7 +415,7 @@ S-016 and S-017 may start after BG1 on a free track, as long as BG2 work has pri
 | S-084 | Unit 3 lab support | lab | S-072, S-031, S-052 | 1 | agent | = |
 | S-085 | Unit 4 lab support | lab | S-072, S-027, S-052 | 1 | agent | = |
 | S-086 | Unit 5 lab support (quorum-limits debrief checked) | lab | S-072, S-031, S-052 | 1 | agent | = |
-| S-063 | Sampled animated request flow (≤ 200 tokens; off on mobile if over budget) | ui | S-061 | 1 | agent | = (cut #2) |
+| S-063 | Sampled animated request tokens on the edges (the replay itself is S-063a) (≤ 200 tokens; off on mobile if over budget) | ui | S-061 | 1 | agent | = (cut #2) |
 | S-064 | Side-by-side compare with common random numbers | ui | S-062, S-050 | 1 | agent | = (cut #6) |
 | S-065 | Diagnose mode: two-step grading, two diagnosis tries | ui | S-061, S-030b | 1 | agent | = |
 | S-066 | Constrained build mode | ui | S-061 | 2 | agent | = (cut #1) |

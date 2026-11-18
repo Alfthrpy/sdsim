@@ -21,6 +21,9 @@ Part of the MVP path (BG1 + BG2, "early access"). Source row: `docs/PLAN.md` sec
 
 1 s buckets, log histogram (<=1% error), Little counters, per-logical-request accounting (MP 4.5).
 
+
+Added by S-103: Also record per bucket and node: utilization, queue length, in-flight, completed, errors, timeouts, p50 and p99; per edge: requests per second (needed by the play replay, `docs/design/lab-flow.md` section 2).
+
 ## Done criteria
 
 - [ ] The PLAN row's outputs exist and behave as described above

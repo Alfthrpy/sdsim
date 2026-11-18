@@ -21,6 +21,9 @@ Part of the MVP path (BG1 + BG2, "early access"). Source row: `docs/PLAN.md` sec
 
 Load (Ajv + catalog checks), edits, K = 5 seeds, targets, structural rules, result ids.
 
+
+Added by S-103: Also return the recorded series of seed 1 next to the grading result, for the play replay (`docs/design/lab-flow.md` section 2).
+
 ## Done criteria
 
 - [ ] The PLAN row's outputs exist and behave as described above

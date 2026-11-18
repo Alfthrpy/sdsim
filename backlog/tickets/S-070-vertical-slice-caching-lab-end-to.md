@@ -7,7 +7,7 @@ owner: agent
 review: agent
 status: todo
 priority: high
-depends_on: [S-023a, S-024, S-025a, S-040, S-051, S-061, S-062, S-068]
+depends_on: [S-023a, S-024, S-025a, S-040, S-051, S-061, S-062, S-068, S-063a]
 estimate: 1
 outputs:
   - validation/labs/caching-basics
