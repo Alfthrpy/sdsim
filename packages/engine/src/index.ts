@@ -1,6 +1,12 @@
 export { Kernel, type RunStatus } from "./kernel/kernel.ts";
 export { stream, RandomStream } from "./rng/streams.ts";
-export { runMMcCallbacks, type MMcConfig, type MMcResult } from "./kernel/mmc.ts";
+export {
+  checkMMcConfig,
+  runMMcCallbacks,
+  type MMcConfig,
+  type MMcResult,
+  type RunSummary,
+} from "./kernel/mmc.ts";
 export { runMMcProcesses, runTandemProcesses } from "./kernel/mmc-process.ts";
 export { serviceSampler, type ServiceKind } from "./kernel/service.ts";
 export { hold, Resource, spawn, type Command, type Process } from "./kernel/process.ts";

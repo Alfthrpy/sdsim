@@ -1,3 +1,4 @@
+import { deterministicLog } from "../src/rng/log.ts";
 import type { MMcConfig } from "../src/index.ts";
 import type { FromWorker, Harness, RunResult, Snapshot, Style, ToWorker } from "./protocol.ts";
 
@@ -8,7 +9,10 @@ function startWorker(): Worker {
 function runInWorker(style: Style, config: MMcConfig, warmup: number): Promise<RunResult> {
   return new Promise((resolve, reject) => {
     const worker = startWorker();
-    worker.onerror = (e) => reject(new Error(e.message));
+    worker.onerror = (e) => {
+      worker.terminate();
+      reject(new Error(e.message));
+    };
     worker.onmessage = (e: MessageEvent<FromWorker>) => {
       if (e.data.type === "result") {
         worker.terminate();
@@ -40,8 +44,12 @@ function snapshotBench(
   const state = new Map<string, Snapshot["nodes"][number]>();
   const handlerMs: number[] = [];
   const cloneMs: number[] = [];
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const worker = startWorker();
+    worker.onerror = (e) => {
+      worker.terminate();
+      reject(new Error(e.message));
+    };
     worker.onmessage = (e: MessageEvent<FromWorker>) => {
       const message = e.data;
       if (message.type === "done") {
@@ -73,5 +81,6 @@ function snapshotBench(
   });
 }
 
-const harness: Harness = { runInWorker, grade, snapshotBench };
+const logOutputs = (inputs: number[]): number[] => inputs.map((x) => deterministicLog(x));
+const harness: Harness = { runInWorker, grade, snapshotBench, logOutputs };
 Object.assign(window, { sdsim: harness });

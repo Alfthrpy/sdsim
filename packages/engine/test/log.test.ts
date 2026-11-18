@@ -1,15 +1,22 @@
 import { expect, test } from "vitest";
 import { deterministicLog } from "../src/rng/log.ts";
 
-test("deterministicLog agrees with Math.log to 1e-14 relative over many magnitudes", () => {
+test("deterministicLog agrees with Math.log to 1e-14 relative over the whole domain", () => {
   let state = 99;
   const rand = (): number => (state = (Math.imul(state, 1664525) + 1013904223) >>> 0) / 2 ** 32;
   for (let i = 0; i < 100_000; i++) {
-    const x = Math.min(1, (rand() + 1e-9) * 10 ** -Math.floor(rand() * 40));
+    // mantissa in [1, 2) times a power of two from 2^-1022 up to 1
+    const x = Math.min(1, (1 + rand()) * 2 ** -Math.floor(rand() * 1022));
+    if (x < 2 ** -1022) continue;
     const expected = Math.log(x);
     const actual = deterministicLog(x);
-    const tolerance = 1e-14 * Math.max(1, Math.abs(expected));
-    expect(Math.abs(actual - expected)).toBeLessThan(tolerance);
+    if (expected === 0) expect(actual).toBe(0);
+    else expect(Math.abs(actual / expected - 1)).toBeLessThan(1e-14);
+  }
+  // close to 1, where ln x is tiny and relative accuracy is hardest
+  for (let k = 1; k <= 52; k++) {
+    const x = 1 - 2 ** -k;
+    expect(Math.abs(deterministicLog(x) / Math.log(x) - 1)).toBeLessThan(1e-14);
   }
 });
 

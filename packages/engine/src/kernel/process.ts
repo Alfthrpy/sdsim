@@ -38,6 +38,15 @@ export class Resource {
     return false;
   }
 
+  /** Servers currently granted. */
+  get busy(): number {
+    return this.#busy;
+  }
+
+  get capacity(): number {
+    return this.#capacity;
+  }
+
   /** Number of processes waiting for a server. Non-zero after a run means processes are stuck. */
   get waiting(): number {
     return this.#waiting.length - this.#head;

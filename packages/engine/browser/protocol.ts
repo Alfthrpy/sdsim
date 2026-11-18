@@ -1,6 +1,6 @@
 import type { MMcConfig } from "../src/index.ts";
 
-export type Style = "callbacks" | "processes";
+export type Style = "callbacks" | "processes" | "tandem";
 
 /** Messages from the page to the Worker. Spike protocol; the real one is S-020. */
 export type ToWorker =
@@ -52,6 +52,8 @@ export interface Harness {
     base: Omit<MMcConfig, "seed">,
     seeds: number[],
   ): Promise<{ wallMs: number; results: RunResult[] }>;
+  /** `deterministicLog` of each input, computed in the page, to compare with Node bit for bit. */
+  logOutputs(inputs: number[]): number[];
   snapshotBench(
     count: number,
     tokens: number,

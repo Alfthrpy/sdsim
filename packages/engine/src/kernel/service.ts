@@ -9,6 +9,8 @@ export type ServiceKind = "exponential" | "deterministic" | "erlang4" | "hyper2"
 const HYPER_P = 0.5 * (1 + Math.sqrt(3 / 5)); // balanced two-phase hyperexponential, cv^2 = 4
 
 export function serviceSampler(kind: ServiceKind, mu: number, rng: RandomStream): () => number {
+  if (!(mu > 0 && mu < Infinity))
+    throw new RangeError(`mu must be a positive finite number, got ${mu}`);
   switch (kind) {
     case "exponential":
       return () => rng.exponential(mu);
@@ -25,5 +27,7 @@ export function serviceSampler(kind: ServiceKind, mu: number, rng: RandomStream)
         rng.uniform() < HYPER_P
           ? rng.exponential(2 * HYPER_P * mu)
           : rng.exponential(2 * (1 - HYPER_P) * mu);
+    default:
+      throw new RangeError(`unknown service kind: ${String(kind)}`);
   }
 }

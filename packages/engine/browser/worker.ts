@@ -1,5 +1,5 @@
 // The only file that touches postMessage (PLAN 9.2). It imports the engine, never the reverse.
-import { runMMcCallbacks, runMMcProcesses } from "../src/index.ts";
+import { runMMcCallbacks, runMMcProcesses, runTandemProcesses } from "../src/index.ts";
 import type { FromWorker, Snapshot, ToWorker } from "./protocol.ts";
 
 const scope = self as unknown as {
@@ -30,8 +30,19 @@ function makeSnapshot(t: number, nodes: number, tokens: number): Snapshot {
 
 scope.onmessage = (event) => {
   const message = event.data;
+  if (message.type !== "run" && message.type !== "snapshots") {
+    throw new TypeError(`unknown message type: ${String((message as { type?: unknown }).type)}`);
+  }
   if (message.type === "run") {
-    const run = message.style === "callbacks" ? runMMcCallbacks : runMMcProcesses;
+    if (!(message.warmup >= 0 && message.warmup < message.config.customers)) {
+      throw new RangeError("warmup must be >= 0 and < customers");
+    }
+    const run =
+      message.style === "callbacks"
+        ? runMMcCallbacks
+        : message.style === "processes"
+          ? runMMcProcesses
+          : runTandemProcesses;
     const start = performance.now();
     const result = run(message.config);
     const workerMs = performance.now() - start;

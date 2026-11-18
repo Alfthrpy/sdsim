@@ -71,6 +71,15 @@ export default tseslint.config(
           selector: "ForInStatement",
           message: "No for...in: iteration order must depend only on inputs.",
         },
+        {
+          selector: "BinaryExpression[operator='**'], AssignmentExpression[operator='**=']",
+          message:
+            "`**` is Math.pow: its last bit is engine-defined. Multiply, or double repeatedly.",
+        },
+        {
+          selector: "VariableDeclarator[init.name='Math'][id.type='ObjectPattern']",
+          message: "Do not destructure Math: it hides the Math.* bans.",
+        },
       ],
     },
   },
