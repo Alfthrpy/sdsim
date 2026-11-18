@@ -9,6 +9,7 @@ const DEPART = 2;
 /** The same M/M/c, written as generator processes (ADR 0003 #2). */
 export function runMMcProcesses(config: MMcConfig): MMcResult {
   const { lambda, mu, servers, customers, seed } = config;
+  const deterministic = config.service === "deterministic";
   const kernel = new Kernel();
   const arrivals = stream(seed, "station", "arrivals");
   const service = stream(seed, "station", "service");
@@ -20,7 +21,7 @@ export function runMMcProcesses(config: MMcConfig): MMcResult {
     const arrivedAt = kernel.now;
     kernel.log(ARRIVE, 0, id);
     yield pool.request();
-    yield hold(service.exponential(mu));
+    yield hold(deterministic ? 1 / mu : service.exponential(mu));
     pool.release();
     kernel.log(DEPART, 0, id);
     sojourns[departed++] = kernel.now - arrivedAt;

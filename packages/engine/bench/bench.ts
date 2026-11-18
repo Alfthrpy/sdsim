@@ -7,15 +7,17 @@ const config: MMcConfig = { lambda: 3.2, mu: 1, servers: 4, customers: 1_000_000
 function measure(name: string, run: (c: MMcConfig) => { events: number }): void {
   run({ ...config, customers: 100_000 }); // warm-up for the JIT
   const rates: number[] = [];
+  let perCustomer = 0;
   for (let i = 0; i < 5; i++) {
     const start = performance.now();
     const { events } = run(config);
     rates.push(events / ((performance.now() - start) / 1000));
+    perCustomer = events / config.customers;
   }
   rates.sort((a, b) => a - b);
   const m = (r: number): string => (r / 1e6).toFixed(2);
   console.log(
-    `${name}: median ${m(rates[2] as number)} M events/s (min ${m(rates[0] as number)}, max ${m(rates[4] as number)})`,
+    `${name}: ${perCustomer.toFixed(2)} events/customer, median ${m(rates[2] as number)} M events/s = ${m((rates[2] as number) / perCustomer)} M customers/s (min ${m(rates[0] as number)}, max ${m(rates[4] as number)})`,
   );
 }
 

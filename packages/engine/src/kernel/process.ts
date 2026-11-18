@@ -1,3 +1,4 @@
+import { SimInvariantError } from "./errors.ts";
 import type { Kernel } from "./kernel.ts";
 
 /** What a process can ask for: wait for simulated time, or a server of a resource. */
@@ -18,6 +19,9 @@ export class Resource {
   #head = 0;
 
   constructor(kernel: Kernel, capacity: number) {
+    if (!Number.isInteger(capacity) || capacity < 1) {
+      throw new RangeError(`capacity must be an integer >= 1, got ${capacity}`);
+    }
     this.#kernel = kernel;
     this.#capacity = capacity;
   }
@@ -34,10 +38,25 @@ export class Resource {
     return false;
   }
 
-  /** Free a server; the next waiter gets it at the same simulated time, in FIFO order. */
+  /** Number of processes waiting for a server. Non-zero after a run means processes are stuck. */
+  get waiting(): number {
+    return this.#waiting.length - this.#head;
+  }
+
+  /**
+   * Free a server; the next waiter gets it at the same simulated time, in FIFO order.
+   * Contract: a process must release exactly once per granted request, also when it ends early;
+   * a process that throws while holding a server leaks it.
+   */
   release(): void {
+    if (this.#busy < 1) throw new SimInvariantError("release without a granted request");
     if (this.#head < this.#waiting.length) {
-      const resume = this.#waiting[this.#head++] as () => void;
+      const resume = this.#waiting[this.#head] as () => void;
+      this.#waiting[this.#head++] = undefined as unknown as () => void;
+      if (this.#head > 1024 && this.#head * 2 > this.#waiting.length) {
+        this.#waiting.splice(0, this.#head);
+        this.#head = 0;
+      }
       this.#kernel.schedule(0, resume);
     } else {
       this.#busy--;

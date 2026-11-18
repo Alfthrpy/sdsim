@@ -42,10 +42,30 @@ test("streams are independent: drawing from one does not change another", () => 
   expect(stream(1, "cache", "keys").uniform()).not.toBe(stream(2, "cache", "keys").uniform());
 });
 
+test("stream keys with a delimiter in the component id do not collide", () => {
+  expect(stream(1, "a|b", "c").uniform()).not.toBe(stream(1, "a", "b|c").uniform());
+  expect(stream(1, "a:1", "x").uniform()).not.toBe(stream(1, "a", "1:x").uniform());
+});
+
 test("exponential draws have the right mean", () => {
   const s = stream(3, "x", "y");
   let sum = 0;
   const n = 200_000;
   for (let i = 0; i < n; i++) sum += s.exponential(2);
   expect(Math.abs(sum / n / 0.5 - 1)).toBeLessThan(0.01);
+});
+
+test("exponential draws have coefficient of variation 1", () => {
+  const s = stream(4, "x", "y");
+  const n = 200_000;
+  let sum = 0;
+  let sumSquares = 0;
+  for (let i = 0; i < n; i++) {
+    const x = s.exponential(1);
+    sum += x;
+    sumSquares += x * x;
+  }
+  const mean = sum / n;
+  const cv = Math.sqrt(sumSquares / n - mean * mean) / mean;
+  expect(Math.abs(cv - 1)).toBeLessThan(0.02);
 });

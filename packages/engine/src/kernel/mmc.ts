@@ -11,6 +11,8 @@ export interface MMcConfig {
   /** How many customers arrive in total. */
   customers: number;
   seed: number;
+  /** Service-time distribution with mean 1 / mu. Default exponential. */
+  service?: "exponential" | "deterministic";
 }
 
 export interface MMcResult {
@@ -26,6 +28,7 @@ const DEPART = 2;
 /** M/M/c written as plain callbacks (the kernel's native style). */
 export function runMMcCallbacks(config: MMcConfig): MMcResult {
   const { lambda, mu, servers, customers, seed } = config;
+  const deterministic = config.service === "deterministic";
   const kernel = new Kernel();
   const arrivals = stream(seed, "station", "arrivals");
   const service = stream(seed, "station", "service");
@@ -40,7 +43,7 @@ export function runMMcCallbacks(config: MMcConfig): MMcResult {
 
   const startService = (id: number): void => {
     busy++;
-    kernel.schedule(service.exponential(mu), () => depart(id));
+    kernel.schedule(deterministic ? 1 / mu : service.exponential(mu), () => depart(id));
   };
   const depart = (id: number): void => {
     kernel.log(DEPART, 0, id);

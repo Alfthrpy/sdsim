@@ -32,5 +32,5 @@ export class RandomStream {
 
 /** The stream for one component and purpose under one run seed (PLAN 9.2). */
 export function stream(seed: number, componentId: string, purpose: string): RandomStream {
-  return new RandomStream(hash32(`${seed}|${componentId}|${purpose}`));
+  return new RandomStream(hash32(`${seed}:${componentId.length}:${componentId}:${purpose}`));
 }
