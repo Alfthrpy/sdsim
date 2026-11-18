@@ -71,12 +71,12 @@ Proposed additions, to go into S-010 (the schema is not started, so this costs o
 
 | Where | Field | Purpose |
 | --- | --- | --- |
-| lab spec | `scenario.story` | the case text (Indonesian, owned by sdlab) |
-| lab spec | `scenario.symptom` | what the learner sees at baseline, one sentence |
-| lab spec | `scenario.timeline[]` | `{at_s, caption}` captions shown during play at the given simulated time |
-| lab spec | `scenario.observe[]` | what to watch while playing (node ids), highlighted during play |
-| lab spec | `play.speeds` (optional) | default 60x; lets a short lab choose 10x |
-| catalog | metric `node_status` | `ok / strained / failing`, `illustrative`, thresholds from section 2 |
+| lab spec | `case.story` | the case text (Indonesian, owned by sdlab) |
+| lab spec | `case.symptom` | what the learner sees at baseline, one sentence |
+| lab spec | `case.timeline[]` | `{at_s, caption}` captions shown during play at the given simulated time |
+| lab spec | `case.observe[]` | what to watch while playing (node ids), highlighted during play |
+| lab spec | `play.speeds`, `play.default_speed` (optional) | the speeds offered (1, 10, 60 by default) and the one selected first; the UI default is 60x when absent. `default_speed` need not be in `speeds` today: a validator rule will decide (RULES.md) |
+| catalog | metric `node_status` | `ok / strained / failing`, `illustrative`, thresholds from section 2. Not in the schema: it is a derived series defined with the descriptors in S-010b |
 | catalog | recorded series per node and per edge | the list in section 2, so the contract says what a lab can rely on |
 
 Engine: S-021 records the per-node and per-edge series in the result of every run (cheap); S-050 returns the record of seed 1 next to the grading result; no new engine mechanics.
@@ -102,7 +102,7 @@ Question for `sdlab`: who writes the captions. (The peak of 240 requests/s in th
 ## 7. Plan changes proposed
 
 1. New ticket **S-063a** (UI, 1 session): the play replay (timeline, state colors with labels, captions, scrubber), in the BG1 set; depends on S-061, S-062, S-021, S-050. S-070 depends on it; the BG1 gate (S-071) adds: the owner plays the baseline and sees the database fail or strain.
-2. S-010 gets the scenario fields (section 5) and depends on this ticket.
+2. S-010 gets the `case` and `play` fields (section 5; the first draft called `case` `scenario`, renamed because `scenarios` already names the diagnose-mode injectors) and depends on this ticket.
 3. S-021 records the series in section 2; S-050 returns seed 1's record.
 4. S-063 (sampled tokens) and live mode stay after BG2.
 5. Cost: BG1 goes from 35 to 36 agent sessions, early access from 41 to 42, the total from 80 to 81.

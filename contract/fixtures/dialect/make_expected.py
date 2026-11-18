@@ -45,7 +45,7 @@ out = []
 for text in json.loads((HERE / "snippets.json").read_text(encoding="utf-8")):
     try:
         out.append({"yaml": text, "pyyaml": tag(yaml.safe_load(text))})
-    except yaml.YAMLError as e:
+    except Exception as e:  # sdlab's read_yaml catches Exception: a ValueError from a bad date is an invalid file too
         out.append({"yaml": text, "pyyaml": {"t": "error", "v": type(e).__name__}})
 (HERE / "expected.json").write_text(json.dumps(out, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
 print(f"{len(out)} snippets, PyYAML {yaml.__version__}")

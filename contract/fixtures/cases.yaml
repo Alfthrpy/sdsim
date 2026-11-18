@@ -501,7 +501,6 @@
   }
 - {
     name: tune-with-empty-allowed-edits,
-    differs: "sdlab reads an empty list as missing and errors too; the message differs",
     schema: invalid,
     at: /allowed_edits,
     keyword: minItems,
@@ -965,4 +964,363 @@
     schema: valid,
     sdlab: "unknown node",
     patch: [{ op: replace, path: /structural_rules/0/args/node, value: ghost }],
+  }
+
+# ---------------------------------------------------------------- numeric edit values (sdlab Malformed.test_edit_values_must_be_numbers)
+- {
+    name: reference-value-true,
+    from: Malformed.test_edit_values_must_be_numbers,
+    schema: invalid,
+    at: /reference_solution/0/value,
+    keyword: type,
+    patch: [{ op: replace, path: /reference_solution/0/value, value: true }],
+  }
+- {
+    name: reference-value-text,
+    from: Malformed.test_edit_values_must_be_numbers,
+    schema: invalid,
+    at: /reference_solution/0/value,
+    keyword: type,
+    patch: [{ op: replace, path: /reference_solution/0/value, value: abc }],
+  }
+- {
+    name: reference-value-empty-text,
+    from: Malformed.test_edit_values_must_be_numbers,
+    schema: invalid,
+    at: /reference_solution/0/value,
+    keyword: type,
+    patch: [{ op: replace, path: /reference_solution/0/value, value: "" }],
+  }
+- {
+    name: reference-value-a-list,
+    from: Malformed.test_edit_values_must_be_numbers,
+    schema: invalid,
+    at: /reference_solution/0/value,
+    keyword: type,
+    patch: [{ op: replace, path: /reference_solution/0/value, value: [1] }],
+  }
+- {
+    name: wrong-answer-edit-value-text,
+    from: Malformed.test_edit_values_must_be_numbers,
+    schema: invalid,
+    at: /wrong_answers/0/edits/0/value,
+    keyword: type,
+    patch: [{ op: replace, path: /wrong_answers/0/edits/0/value, value: abc }],
+  }
+- {
+    name: build-mode-accepts-text-edit-values,
+    schema: valid,
+    patch:
+      [
+        { op: replace, path: /mode, value: build },
+        { op: remove, path: /allowed_edits },
+        { op: add, path: /palette, value: [{ type: cache, max: 1 }] },
+        { op: replace, path: /reference_solution/0/value, value: look-aside },
+      ],
+  }
+
+# ---------------------------------------------------------------- more structure from sdlab tests
+- {
+    name: unknown-field-in-hint,
+    from: Malformed.test_unknown_fields_are_errors,
+    schema: invalid,
+    at: /hints/0,
+    keyword: additionalProperties,
+    property: note,
+    patch: [{ op: add, path: /hints/0/note, value: x }],
+  }
+- {
+    name: unknown-field-in-allowed-edit,
+    from: Malformed.test_unknown_fields_are_errors,
+    schema: invalid,
+    at: /allowed_edits/0,
+    keyword: additionalProperties,
+    property: step,
+    patch: [{ op: add, path: /allowed_edits/0/step, value: 5 }],
+  }
+- {
+    name: unknown-field-in-wrong-answer,
+    from: Malformed.test_unknown_fields_are_errors,
+    schema: invalid,
+    at: /wrong_answers/0,
+    keyword: additionalProperties,
+    property: note,
+    patch: [{ op: add, path: /wrong_answers/0/note, value: x }],
+  }
+- {
+    name: allowed-edits-not-a-list,
+    from: Malformed.test_no_traceback,
+    schema: invalid,
+    at: /allowed_edits,
+    keyword: type,
+    patch: [{ op: replace, path: /allowed_edits, value: 5 }],
+  }
+- {
+    name: targets-not-a-list,
+    differs: "sdlab silently ignores a targets value that is not a list",
+    from: Malformed.test_no_traceback,
+    schema: invalid,
+    at: /targets,
+    keyword: type,
+    patch: [{ op: replace, path: /targets, value: { a: 1 } }],
+  }
+- {
+    name: hints-not-a-list,
+    from: Malformed.test_no_traceback,
+    schema: invalid,
+    at: /hints,
+    keyword: type,
+    patch: [{ op: replace, path: /hints, value: text }],
+  }
+- {
+    name: topology-not-a-mapping,
+    from: Malformed.test_no_traceback,
+    schema: invalid,
+    at: /topology,
+    keyword: type,
+    patch: [{ op: replace, path: /topology, value: [a, b] }],
+  }
+- {
+    name: traffic-not-a-mapping,
+    from: Malformed.test_no_traceback,
+    schema: invalid,
+    at: /traffic,
+    keyword: type,
+    patch: [{ op: replace, path: /traffic, value: 80 }],
+  }
+- {
+    name: wrong-answer-identical-to-reference,
+    from: LabSolutions.test_duplicate_allowed_edit_and_identical_wrong_answer,
+    schema: valid,
+    sdlab: "identical to the reference",
+    patch:
+      [
+        {
+          op: replace,
+          path: /wrong_answers/0/edits,
+          value:
+            [
+              { node: cache, param: capacity_pct, value: 20 },
+              { node: cache, param: ttl_s, value: 300 },
+            ],
+        },
+      ],
+  }
+- {
+    name: wrong-answer-edit-outside-allowed-edits,
+    from: LabSolutions.test_wrong_answer_edits_checked_against_allowed_edits,
+    schema: valid,
+    sdlab: "wrong_answers[0]",
+    patch: [{ op: replace, path: /wrong_answers/0/edits/0/value, value: 99999 }],
+  }
+
+# ---------------------------------------------------------------- limits chosen in 0.1.0 (a wider limit is a minor change, a narrower one a major)
+- {
+    name: rate-above-500,
+    differs: "sdlab has no upper bounds; PLAN 9.4 caps lab rates at 500 requests/s",
+    schema: invalid,
+    at: /traffic/schedule/0/rate,
+    keyword: maximum,
+    patch: [{ op: replace, path: /traffic/schedule/0/rate, value: 501 }],
+  }
+- {
+    name: keys-above-a-million,
+    differs: "sdlab has no upper bounds",
+    schema: invalid,
+    at: /traffic/keys,
+    keyword: maximum,
+    patch: [{ op: replace, path: /traffic/keys, value: 1000001 }],
+  }
+- {
+    name: skew-above-3,
+    differs: "sdlab has no upper bounds",
+    schema: invalid,
+    at: /traffic/skew,
+    keyword: maximum,
+    patch: [{ op: replace, path: /traffic/skew, value: 4 }],
+  }
+- {
+    name: duration-above-120-minutes,
+    differs: "sdlab has no upper bound",
+    schema: invalid,
+    at: /duration_min,
+    keyword: maximum,
+    patch: [{ op: replace, path: /duration_min, value: 1000000000 }],
+  }
+- {
+    name: schedule-time-above-an-hour,
+    differs: "sdlab has no upper bound",
+    schema: invalid,
+    at: /traffic/schedule/1/at_s,
+    keyword: maximum,
+    patch: [{ op: replace, path: /traffic/schedule/1/at_s, value: 100000 }],
+  }
+- {
+    name: window-end-above-an-hour,
+    differs: "sdlab has no upper bound",
+    schema: invalid,
+    at: /targets/0/window/to_s,
+    keyword: maximum,
+    patch: [{ op: replace, path: /targets/0/window/to_s, value: 100000 }],
+  }
+
+# ---------------------------------------------------------------- the schema is stricter than sdlab's validator today (sdlab accepts these)
+- {
+    name: unknown-field-in-topology,
+    differs: "sdlab does not check unknown topology fields",
+    schema: invalid,
+    at: /topology,
+    keyword: additionalProperties,
+    property: layout,
+    patch: [{ op: add, path: /topology/layout, value: grid }],
+  }
+- {
+    name: unknown-field-in-edge-mapping,
+    differs: "sdlab does not check unknown edge fields",
+    schema: invalid,
+    at: /topology/edges/0,
+    keyword: oneOf,
+    patch: [{ op: replace, path: /topology/edges/0, value: { from: users, to: app, weight: 2 } }],
+  }
+- {
+    name: unknown-field-in-schedule-item,
+    differs: "sdlab does not check unknown schedule fields",
+    schema: invalid,
+    at: /traffic/schedule/0,
+    keyword: additionalProperties,
+    property: burst,
+    patch: [{ op: add, path: /traffic/schedule/0/burst, value: 3 }],
+  }
+- {
+    name: unknown-field-in-edit,
+    differs: "sdlab does not check unknown fields in edits",
+    schema: invalid,
+    at: /reference_solution/0,
+    keyword: additionalProperties,
+    property: unit,
+    patch: [{ op: add, path: /reference_solution/0/unit, value: pct }],
+  }
+- {
+    name: negative-schedule-time,
+    differs: "sdlab does not check the sign of at_s",
+    schema: invalid,
+    at: /traffic/schedule/0/at_s,
+    keyword: minimum,
+    patch: [{ op: replace, path: /traffic/schedule/0/at_s, value: -5 }],
+  }
+- {
+    name: negative-window-start,
+    differs: "sdlab accepts a negative from_s",
+    schema: invalid,
+    at: /targets/0/window/from_s,
+    keyword: minimum,
+    patch: [{ op: replace, path: /targets/0/window/from_s, value: -1 }],
+  }
+- {
+    name: node-type-not-kebab,
+    differs: "sdlab does not check the shape of node types",
+    schema: invalid,
+    at: /topology/nodes/1/type,
+    keyword: pattern,
+    patch: [{ op: replace, path: /topology/nodes/1/type, value: ApiServer }],
+  }
+- {
+    name: concept-id-not-kebab,
+    differs: "sdlab checks the concept against concepts.yaml, not its shape",
+    schema: invalid,
+    at: /concept,
+    keyword: pattern,
+    patch: [{ op: replace, path: /concept, value: Caching_Basics }],
+  }
+- {
+    name: palette-item-without-max,
+    differs: "sdlab checks only the type of a palette item",
+    schema: invalid,
+    at: /palette/0,
+    keyword: required,
+    property: max,
+    patch:
+      [
+        { op: replace, path: /mode, value: build },
+        { op: remove, path: /allowed_edits },
+        { op: add, path: /palette, value: [{ type: cache }] },
+      ],
+  }
+- {
+    name: palette-max-zero,
+    differs: "sdlab checks only the type of a palette item",
+    schema: invalid,
+    at: /palette/0/max,
+    keyword: minimum,
+    patch:
+      [
+        { op: replace, path: /mode, value: build },
+        { op: remove, path: /allowed_edits },
+        { op: add, path: /palette, value: [{ type: cache, max: 0 }] },
+      ],
+  }
+- {
+    name: empty-scenarios-in-tune-mode,
+    differs: "sdlab reads an empty list as absent; the schema forbids the field in tune mode",
+    schema: invalid,
+    at: /scenarios,
+    keyword: false schema,
+    patch: [{ op: add, path: /scenarios, value: [] }],
+  }
+- {
+    name: empty-allowed-edits-in-build-mode,
+    differs: "sdlab reads an empty list as absent; the schema forbids the field in build mode",
+    schema: invalid,
+    at: /allowed_edits,
+    keyword: false schema,
+    patch:
+      [
+        { op: replace, path: /mode, value: build },
+        { op: replace, path: /allowed_edits, value: [] },
+        { op: add, path: /palette, value: [{ type: cache, max: 1 }] },
+      ],
+  }
+- {
+    name: null-target-node,
+    differs: "sdlab treats a null node as absent",
+    schema: invalid,
+    at: /targets/0/node,
+    keyword: type,
+    patch: [{ op: add, path: /targets/0/node, value: null }],
+  }
+- {
+    name: difficulty-written-as-float,
+    differs: "YAML 2.0 is a float in PyYAML and an integer in JavaScript: sdlab rejects it, the schema cannot tell",
+    schema: valid,
+    patch: [{ op: replace, path: /difficulty, value: 2.0 }],
+  }
+
+# ---------------------------------------------------------------- the new case and play fields (S-103)
+- {
+    name: case-observe-unknown-node,
+    differs: "new field from S-103: sdlab does not know `case` yet",
+    schema: valid,
+    note: "a reference to a node that does not exist is a validator rule (RULES.md C13), not schema",
+    patch: [{ op: add, path: /case, value: { story: "Cerita.", observe: [ghost] } }],
+  }
+- {
+    name: case-observe-not-kebab,
+    schema: invalid,
+    at: /case/observe/0,
+    keyword: pattern,
+    patch: [{ op: add, path: /case, value: { story: "Cerita.", observe: [DB] } }],
+  }
+- {
+    name: case-caption-above-an-hour,
+    schema: invalid,
+    at: /case/timeline/0/at_s,
+    keyword: maximum,
+    patch:
+      [
+        {
+          op: add,
+          path: /case,
+          value: { story: "Cerita.", timeline: [{ at_s: 5000, caption: "Lama." }] },
+        },
+      ],
   }

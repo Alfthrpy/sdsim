@@ -643,5 +643,294 @@
         }
       }
     }
+  },
+  {
+    "yaml": "a:\tb",
+    "pyyaml": {
+      "t": "error",
+      "v": "ScannerError"
+    }
+  },
+  {
+    "yaml": "a: b\tc",
+    "pyyaml": {
+      "t": "error",
+      "v": "ScannerError"
+    }
+  },
+  {
+    "yaml": "a: -.5",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "str",
+          "v": "-.5"
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: +.5",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "str",
+          "v": "+.5"
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: 08",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "str",
+          "v": "08"
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: 0_8",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "str",
+          "v": "0_8"
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: 09.5",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "float",
+          "v": 9.5
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: 2025-1-1",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "str",
+          "v": "2025-1-1"
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: 2025-02-30",
+    "pyyaml": {
+      "t": "error",
+      "v": "ValueError"
+    }
+  },
+  {
+    "yaml": "a: 2025-13-01",
+    "pyyaml": {
+      "t": "error",
+      "v": "ValueError"
+    }
+  },
+  {
+    "yaml": "a: !!float 3",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "float",
+          "v": 3.0
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: 1\rb: 2",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "int",
+          "v": 1
+        },
+        "b": {
+          "t": "int",
+          "v": 2
+        }
+      }
+    }
+  },
+  {
+    "yaml": "? [a, b]\n: c",
+    "pyyaml": {
+      "t": "error",
+      "v": "ConstructorError"
+    }
+  },
+  {
+    "yaml": "a: &x 1\nb: *x",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "int",
+          "v": 1
+        },
+        "b": {
+          "t": "int",
+          "v": 1
+        }
+      }
+    }
+  },
+  {
+    "yaml": "base: &b {x: 1}\nd:\n  <<: *b\n  y: 2",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "base": {
+          "t": "map",
+          "v": {
+            "x": {
+              "t": "int",
+              "v": 1
+            }
+          }
+        },
+        "d": {
+          "t": "map",
+          "v": {
+            "x": {
+              "t": "int",
+              "v": 1
+            },
+            "y": {
+              "t": "int",
+              "v": 2
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: |\n  text\n  more\n",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "str",
+          "v": "text\nmore\n"
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: >\n  folded\n  text\n",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "str",
+          "v": "folded text\n"
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: 'it''s'",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "str",
+          "v": "it's"
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: \"\\u00e9\"",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "str",
+          "v": "é"
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: 2.0",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "float",
+          "v": 2.0
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: 2.",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "float",
+          "v": 2.0
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: 1_0.5",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "float",
+          "v": 10.5
+        }
+      }
+    }
+  },
+  {
+    "yaml": "tier: 1.0",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "tier": {
+          "t": "float",
+          "v": 1.0
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: |\n  text\n  more",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "str",
+          "v": "text\nmore"
+        }
+      }
+    }
   }
 ]

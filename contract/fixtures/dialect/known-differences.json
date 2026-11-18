@@ -1,0 +1,13 @@
+{
+  "a: =": "PyYAML cannot construct the YAML 1.1 `value` scalar and reports invalid YAML; the loader reads a string",
+  "a: <<": "the same for the `merge` scalar used as a value",
+  "a:\tb": "a tab after the colon is a PyYAML scanner error; the loader accepts it",
+  "a: b\tc": "a tab inside a plain scalar is a PyYAML scanner error; the loader accepts it",
+  "a: 2025-1-1": "PyYAML reads an unpadded date as a string; the loader reads a date. Lab specs contain no dates",
+  "a: 2025-02-30": "PyYAML fails on an impossible date; the loader rolls it over. Lab specs contain no dates",
+  "a: 2025-13-01": "the same for an impossible month",
+  "a: !!float 3": "an explicit !!float tag on an integer: PyYAML gives 3.0, the loader a string",
+  "a: 1\rb: 2": "a bare carriage return as a line break: PyYAML reads two keys, the loader fails",
+  "? [a, b]\n: c": "a complex (non-scalar) mapping key: PyYAML fails to construct it, the loader accepts it",
+  "a: |\n  text\n  more": "a block scalar at the very end of a text with no final newline: PyYAML drops the trailing newline of the value, the loader keeps it"
+}

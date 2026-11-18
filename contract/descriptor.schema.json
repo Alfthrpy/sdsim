@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/Alfthrpy/sdsim/contract/descriptor.schema.json",
   "title": "Catalog entry descriptor (component, policy, scenario)",
-  "description": "What a component, edge policy or scenario injector declares about itself. The catalog and the lab-spec checks C03/C04 are generated from these (ADR 0003 #1). Ranges where min > max, and an evidence id without a matching test, are checked at build time, not here.",
+  "description": "What a component, edge policy or scenario injector declares about itself. The catalog and the lab-spec checks C03/C04 are generated from these (ADR 0003 #1). Checked at build time, not here: min greater than max, a default outside [min, max] or outside an enum's values, duplicate parameter or metric ids, and an evidence id without a matching test. The $id is an identifier, not a fetched address.",
   "oneOf": [
     {
       "type": "object",
@@ -170,6 +170,22 @@
               "assumption": true
             }
           }
+        },
+        {
+          "if": {
+            "properties": {
+              "label": {
+                "const": "not-modeled"
+              }
+            },
+            "required": ["label"]
+          },
+          "then": {
+            "properties": {
+              "evidence": false,
+              "assumption": false
+            }
+          }
         }
       ]
     },
@@ -243,7 +259,74 @@
           "then": {
             "required": ["values"],
             "properties": {
+              "default": {
+                "type": "string"
+              },
+              "min": false,
+              "max": false,
               "values": true
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "boolean"
+              }
+            },
+            "required": ["kind"]
+          },
+          "then": {
+            "properties": {
+              "default": {
+                "type": "boolean"
+              },
+              "min": false,
+              "max": false,
+              "values": false
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "number"
+              }
+            },
+            "required": ["kind"]
+          },
+          "then": {
+            "properties": {
+              "default": {
+                "type": "number"
+              },
+              "values": false
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "integer"
+              }
+            },
+            "required": ["kind"]
+          },
+          "then": {
+            "properties": {
+              "default": {
+                "type": "integer"
+              },
+              "min": {
+                "type": "integer"
+              },
+              "max": {
+                "type": "integer"
+              },
+              "values": false
             }
           }
         }
