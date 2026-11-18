@@ -5,7 +5,7 @@ milestone: S0
 type: infra
 owner: agent
 review: human
-status: review
+status: done
 priority: high
 depends_on: []
 estimate: 1
@@ -32,8 +32,8 @@ npm workspaces (incl. packages/components, sandbox/), TS 6.0.3, Vitest, ESLint b
 - [x] The engine bans and the boundaries are proven to fire (a temporary file breaking each rule failed lint; removed afterwards)
 - [x] `engineering.md` wording (R13) and layer table (ADR 0003) fixed; `ux-reviewer` stub added; ADR 0004 written
 - [x] `npm run lint`, `format`, `typecheck`, `npm test` and `python scripts/validate.py` pass locally
-- [ ] CI is green on GitHub, which also confirms free Actions minutes on the public repo (verified when the PR runs)
-- [ ] Owner reviewed and merged (`review: human`)
+- [x] CI is green on GitHub, which also confirms free Actions minutes on the public repo (verified when the PR runs)
+- [x] Owner reviewed and merged (`review: human`)
 
 ## Notes
 
