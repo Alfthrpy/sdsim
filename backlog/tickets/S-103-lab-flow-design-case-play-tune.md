@@ -5,7 +5,7 @@ milestone: S1
 type: decision
 owner: agent
 review: human
-status: in-progress
+status: review
 priority: high
 depends_on: []
 estimate: 1
