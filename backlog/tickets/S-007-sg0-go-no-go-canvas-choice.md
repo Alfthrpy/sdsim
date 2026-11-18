@@ -7,7 +7,7 @@ owner: human
 review: none
 status: todo
 priority: high
-depends_on: [S-003, S-005, S-006, S-008]
+depends_on: [S-003, S-003b, S-005, S-006, S-008]
 estimate: 1
 outputs:
   - docs/decisions/
