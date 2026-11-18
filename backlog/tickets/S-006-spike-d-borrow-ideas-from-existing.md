@@ -5,7 +5,7 @@ milestone: S0
 type: spike
 owner: agent
 review: agent
-status: in-progress
+status: done
 priority: medium
 depends_on: [S-003]
 estimate: 1
@@ -30,7 +30,7 @@ PLAN row S-006: borrow ideas, not code, from Breakscale and loadsketch (both MIT
 - [x] A recommendation on build versus adopt, marked as input for the owner's SG0 decision
 - [x] Each borrowed idea is mapped to a ticket or marked for later
 - [x] Independent review (model-reviewer) done and findings fixed (see Notes)
-- [ ] CI green
+- [x] CI green (PR #10)
 
 ## Notes
 
