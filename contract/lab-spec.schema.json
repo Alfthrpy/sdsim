@@ -1,0 +1,922 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Alfthrpy/sdsim/contract/lab-spec.schema.json",
+  "title": "SD Lab lab spec (structure only)",
+  "description": "Structure of a lab spec, version 0.1.0 of the contract. Cross-field rules (references, ranges, ordering, anti-leak) and catalog rules are validator rules, not schema: see contract/RULES.md.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "#/$defs/kebab"
+    },
+    "concept": {
+      "$ref": "#/$defs/kebab"
+    },
+    "secondary_concepts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/kebab"
+      }
+    },
+    "contract_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "mode": {
+      "enum": ["tune", "diagnose", "build"]
+    },
+    "difficulty": {
+      "enum": [1, 2, 3]
+    },
+    "duration_min": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "illustrative": {
+      "type": "boolean"
+    },
+    "illustrative_note": {
+      "$ref": "#/$defs/text"
+    },
+    "title": {
+      "$ref": "#/$defs/text"
+    },
+    "goal": {
+      "$ref": "#/$defs/text"
+    },
+    "case": {
+      "$ref": "#/$defs/case"
+    },
+    "play": {
+      "$ref": "#/$defs/play"
+    },
+    "topology": {
+      "type": "object",
+      "properties": {
+        "nodes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/node"
+          }
+        },
+        "edges": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/edge"
+          }
+        }
+      },
+      "required": ["nodes"],
+      "additionalProperties": false
+    },
+    "traffic": {
+      "$ref": "#/$defs/traffic"
+    },
+    "scenarios": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/scenario"
+      }
+    },
+    "allowed_edits": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/allowedEdit"
+      }
+    },
+    "palette": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/paletteItem"
+      }
+    },
+    "targets": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/target"
+      }
+    },
+    "structural_rules": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/structuralRule"
+      }
+    },
+    "hints": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/hint"
+      },
+      "allOf": [
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "tier": {
+                "const": 1
+              }
+            },
+            "required": ["tier"]
+          }
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "tier": {
+                "const": 2
+              }
+            },
+            "required": ["tier"]
+          }
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "tier": {
+                "const": 3
+              }
+            },
+            "required": ["tier"]
+          }
+        }
+      ]
+    },
+    "reference_solution": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/edit"
+      }
+    },
+    "wrong_answers": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/wrongAnswer"
+      }
+    },
+    "brute_force_ok": {
+      "$ref": "#/$defs/text"
+    },
+    "debrief": {
+      "$ref": "#/$defs/text"
+    },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/kebab"
+      }
+    }
+  },
+  "required": [
+    "id",
+    "concept",
+    "contract_version",
+    "mode",
+    "difficulty",
+    "duration_min",
+    "illustrative",
+    "title",
+    "goal",
+    "topology",
+    "traffic",
+    "targets",
+    "hints",
+    "reference_solution",
+    "wrong_answers",
+    "debrief",
+    "sources"
+  ],
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "illustrative": {
+            "const": true
+          }
+        },
+        "required": ["illustrative"]
+      },
+      "then": {
+        "required": ["illustrative_note"],
+        "properties": {
+          "illustrative_note": true
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "mode": {
+            "const": "tune"
+          }
+        },
+        "required": ["mode"]
+      },
+      "then": {
+        "required": ["allowed_edits"],
+        "properties": {
+          "allowed_edits": {
+            "type": "array",
+            "minItems": 1
+          },
+          "scenarios": false,
+          "palette": false
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "mode": {
+            "const": "diagnose"
+          }
+        },
+        "required": ["mode"]
+      },
+      "then": {
+        "required": ["scenarios", "allowed_edits"],
+        "properties": {
+          "scenarios": {
+            "type": "array",
+            "minItems": 1
+          },
+          "allowed_edits": {
+            "type": "array",
+            "minItems": 1
+          },
+          "palette": false
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "mode": {
+            "const": "build"
+          }
+        },
+        "required": ["mode"]
+      },
+      "then": {
+        "required": ["palette"],
+        "properties": {
+          "palette": {
+            "type": "array",
+            "minItems": 1
+          },
+          "scenarios": false,
+          "allowed_edits": false
+        }
+      }
+    },
+    {
+      "anyOf": [
+        {
+          "required": ["brute_force_ok"],
+          "properties": {
+            "brute_force_ok": true
+          }
+        },
+        {
+          "properties": {
+            "wrong_answers": {
+              "type": "array",
+              "contains": {
+                "type": "object",
+                "properties": {
+                  "brute_force": {
+                    "const": true
+                  }
+                },
+                "required": ["brute_force"]
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "$defs": {
+    "kebab": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "snake": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "text": {
+      "type": "string",
+      "pattern": "\\S"
+    },
+    "scalar": {
+      "type": ["number", "string", "boolean"]
+    },
+    "params": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/scalar"
+      }
+    },
+    "node": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/kebab"
+        },
+        "type": {
+          "$ref": "#/$defs/kebab"
+        },
+        "params": {
+          "$ref": "#/$defs/params"
+        }
+      },
+      "required": ["id", "type"],
+      "additionalProperties": false
+    },
+    "policyRef": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/kebab"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/kebab"
+            },
+            "params": {
+              "$ref": "#/$defs/params"
+            }
+          },
+          "required": ["id"],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "edge": {
+      "oneOf": [
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/kebab"
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        {
+          "type": "object",
+          "properties": {
+            "from": {
+              "$ref": "#/$defs/kebab"
+            },
+            "to": {
+              "$ref": "#/$defs/kebab"
+            },
+            "policies": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/policyRef"
+              }
+            }
+          },
+          "required": ["from", "to"],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "traffic": {
+      "type": "object",
+      "properties": {
+        "read_share": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "keys": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "skew": {
+          "type": "number",
+          "minimum": 0
+        },
+        "schedule": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "at_s": {
+                "type": "number",
+                "minimum": 0
+              },
+              "rate": {
+                "type": "number",
+                "minimum": 0
+              }
+            },
+            "required": ["at_s", "rate"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["schedule"],
+      "additionalProperties": false
+    },
+    "scenario": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/kebab"
+        },
+        "at_s": {
+          "type": "number",
+          "minimum": 0
+        },
+        "duration_s": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "params": {
+          "$ref": "#/$defs/params"
+        }
+      },
+      "required": ["id", "at_s"],
+      "additionalProperties": false
+    },
+    "allowedEdit": {
+      "type": "object",
+      "properties": {
+        "node": {
+          "$ref": "#/$defs/kebab"
+        },
+        "param": {
+          "$ref": "#/$defs/snake"
+        },
+        "min": {
+          "type": "number"
+        },
+        "max": {
+          "type": "number"
+        }
+      },
+      "required": ["node", "param", "min", "max"],
+      "additionalProperties": false
+    },
+    "paletteItem": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/kebab"
+        },
+        "max": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": ["type", "max"],
+      "additionalProperties": false
+    },
+    "edit": {
+      "type": "object",
+      "properties": {
+        "node": {
+          "$ref": "#/$defs/kebab"
+        },
+        "param": {
+          "$ref": "#/$defs/snake"
+        },
+        "value": {
+          "$ref": "#/$defs/scalar"
+        }
+      },
+      "required": ["node", "param", "value"],
+      "additionalProperties": false
+    },
+    "target": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/kebab"
+        },
+        "metric": {
+          "$ref": "#/$defs/snake"
+        },
+        "node": {
+          "$ref": "#/$defs/kebab"
+        },
+        "window": {
+          "type": "object",
+          "properties": {
+            "from_s": {
+              "type": "number",
+              "minimum": 0
+            },
+            "to_s": {
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          "required": ["from_s", "to_s"],
+          "additionalProperties": false
+        },
+        "aggregate": {
+          "enum": ["mean", "max", "p99"]
+        },
+        "op": {
+          "enum": ["<=", ">=", "<", ">"]
+        },
+        "value": {
+          "type": "number"
+        },
+        "feedback_pass": {
+          "$ref": "#/$defs/text"
+        },
+        "feedback_fail": {
+          "$ref": "#/$defs/text"
+        }
+      },
+      "required": [
+        "id",
+        "metric",
+        "window",
+        "aggregate",
+        "op",
+        "value",
+        "feedback_pass",
+        "feedback_fail"
+      ],
+      "additionalProperties": false
+    },
+    "hint": {
+      "type": "object",
+      "properties": {
+        "tier": {
+          "enum": [1, 2, 3]
+        },
+        "text": {
+          "$ref": "#/$defs/text"
+        }
+      },
+      "required": ["tier", "text"],
+      "additionalProperties": false
+    },
+    "wrongAnswer": {
+      "type": "object",
+      "properties": {
+        "edits": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/edit"
+          }
+        },
+        "reason": {
+          "$ref": "#/$defs/text"
+        },
+        "brute_force": {
+          "type": "boolean"
+        }
+      },
+      "required": ["edits", "reason"],
+      "additionalProperties": false
+    },
+    "case": {
+      "type": "object",
+      "properties": {
+        "story": {
+          "$ref": "#/$defs/text"
+        },
+        "symptom": {
+          "$ref": "#/$defs/text"
+        },
+        "timeline": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "at_s": {
+                "type": "number",
+                "minimum": 0
+              },
+              "caption": {
+                "$ref": "#/$defs/text"
+              }
+            },
+            "required": ["at_s", "caption"],
+            "additionalProperties": false
+          }
+        },
+        "observe": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/kebab"
+          }
+        }
+      },
+      "required": ["story"],
+      "additionalProperties": false
+    },
+    "play": {
+      "type": "object",
+      "properties": {
+        "speeds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          }
+        },
+        "default_speed": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "structuralRule": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/kebab"
+        },
+        "predicate": {
+          "enum": [
+            "has-node",
+            "has-edge",
+            "node-between",
+            "param-unchanged",
+            "param-range",
+            "count-le",
+            "policy-present",
+            "no-spof"
+          ]
+        },
+        "args": {
+          "type": "object"
+        },
+        "feedback_pass": {
+          "$ref": "#/$defs/text"
+        },
+        "feedback_fail": {
+          "$ref": "#/$defs/text"
+        }
+      },
+      "required": ["id", "predicate", "args", "feedback_pass", "feedback_fail"],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "predicate": {
+                "const": "has-node"
+              }
+            },
+            "required": ["predicate"]
+          },
+          "then": {
+            "properties": {
+              "args": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "$ref": "#/$defs/kebab"
+                  },
+                  "min": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                },
+                "required": ["type"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "predicate": {
+                "const": "has-edge"
+              }
+            },
+            "required": ["predicate"]
+          },
+          "then": {
+            "properties": {
+              "args": {
+                "type": "object",
+                "properties": {
+                  "from": {
+                    "$ref": "#/$defs/kebab"
+                  },
+                  "to": {
+                    "$ref": "#/$defs/kebab"
+                  }
+                },
+                "required": ["from", "to"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "predicate": {
+                "const": "node-between"
+              }
+            },
+            "required": ["predicate"]
+          },
+          "then": {
+            "properties": {
+              "args": {
+                "type": "object",
+                "properties": {
+                  "node": {
+                    "$ref": "#/$defs/kebab"
+                  },
+                  "from": {
+                    "$ref": "#/$defs/kebab"
+                  },
+                  "to": {
+                    "$ref": "#/$defs/kebab"
+                  }
+                },
+                "required": ["node", "from", "to"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "predicate": {
+                "const": "param-unchanged"
+              }
+            },
+            "required": ["predicate"]
+          },
+          "then": {
+            "properties": {
+              "args": {
+                "type": "object",
+                "properties": {
+                  "node": {
+                    "$ref": "#/$defs/kebab"
+                  },
+                  "param": {
+                    "$ref": "#/$defs/snake"
+                  }
+                },
+                "required": ["node", "param"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "predicate": {
+                "const": "param-range"
+              }
+            },
+            "required": ["predicate"]
+          },
+          "then": {
+            "properties": {
+              "args": {
+                "type": "object",
+                "properties": {
+                  "node": {
+                    "$ref": "#/$defs/kebab"
+                  },
+                  "param": {
+                    "$ref": "#/$defs/snake"
+                  },
+                  "min": {
+                    "type": "number"
+                  },
+                  "max": {
+                    "type": "number"
+                  }
+                },
+                "required": ["node", "param"],
+                "additionalProperties": false,
+                "anyOf": [
+                  {
+                    "required": ["min"],
+                    "properties": {
+                      "min": true
+                    }
+                  },
+                  {
+                    "required": ["max"],
+                    "properties": {
+                      "max": true
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "predicate": {
+                "const": "count-le"
+              }
+            },
+            "required": ["predicate"]
+          },
+          "then": {
+            "properties": {
+              "args": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "$ref": "#/$defs/kebab"
+                  },
+                  "max": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "required": ["type", "max"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "predicate": {
+                "const": "policy-present"
+              }
+            },
+            "required": ["predicate"]
+          },
+          "then": {
+            "properties": {
+              "args": {
+                "type": "object",
+                "properties": {
+                  "from": {
+                    "$ref": "#/$defs/kebab"
+                  },
+                  "to": {
+                    "$ref": "#/$defs/kebab"
+                  },
+                  "policy": {
+                    "$ref": "#/$defs/kebab"
+                  }
+                },
+                "required": ["from", "to", "policy"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "predicate": {
+                "const": "no-spof"
+              }
+            },
+            "required": ["predicate"]
+          },
+          "then": {
+            "properties": {
+              "args": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "$ref": "#/$defs/kebab"
+                  }
+                },
+                "required": ["type"],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,647 @@
+[
+  {
+    "yaml": "a: yes",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: no",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "bool",
+          "v": false
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: on",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: off",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "bool",
+          "v": false
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: Yes",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: NO",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "bool",
+          "v": false
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: true",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: False",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "bool",
+          "v": false
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: y",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "str",
+          "v": "y"
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: n",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "str",
+          "v": "n"
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: 0.1",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "float",
+          "v": 0.1
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: 1_000",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "int",
+          "v": 1000
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: 010",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "int",
+          "v": 8
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: 0o10",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "str",
+          "v": "0o10"
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: 0x1f",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "int",
+          "v": 31
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: 0b101",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "int",
+          "v": 5
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: 1e3",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "str",
+          "v": "1e3"
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: 1.0e3",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "str",
+          "v": "1.0e3"
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: .5",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "float",
+          "v": 0.5
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: 5.",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "float",
+          "v": 5.0
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: 1:30",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "int",
+          "v": 90
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: 12:30:45",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "int",
+          "v": 45045
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: 1,000",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "str",
+          "v": "1,000"
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: +1",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "int",
+          "v": 1
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: -0",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "int",
+          "v": 0
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: ~",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "null"
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: null",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "null"
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: Null",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "null"
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a:",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "null"
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: 0.1.0",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "str",
+          "v": "0.1.0"
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: '0.1.0'",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "str",
+          "v": "0.1.0"
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: 0.1",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "float",
+          "v": 0.1
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: \"0.1\"",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "str",
+          "v": "0.1"
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: 2025-01-01",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "date",
+          "v": "2025-01-01"
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: 2025-01-01 10:00:00",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "datetime",
+          "v": "2025-01-01T10:00:00"
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: 2025-01-01T10:00:00Z",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "datetime",
+          "v": "2025-01-01T10:00:00+00:00"
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: .inf",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "float",
+          "v": "inf"
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: -.inf",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "float",
+          "v": "-inf"
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: .nan",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "float",
+          "v": "nan"
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: <=",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "str",
+          "v": "<="
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: \"<=\"",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "str",
+          "v": "<="
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: =",
+    "pyyaml": {
+      "t": "error",
+      "v": "ConstructorError"
+    }
+  },
+  {
+    "yaml": "a: <<",
+    "pyyaml": {
+      "t": "error",
+      "v": "ConstructorError"
+    }
+  },
+  {
+    "yaml": "a: [on, off]",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "list",
+          "v": [
+            {
+              "t": "bool",
+              "v": true
+            },
+            {
+              "t": "bool",
+              "v": false
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: {x: no}",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "map",
+          "v": {
+            "x": {
+              "t": "bool",
+              "v": false
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: [1_0, 0b1]",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "list",
+          "v": [
+            {
+              "t": "int",
+              "v": 10
+            },
+            {
+              "t": "int",
+              "v": 1
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: 1\na: 2",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "int",
+          "v": 2
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: !!str yes",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "str",
+          "v": "yes"
+        }
+      }
+    }
+  },
+  {
+    "yaml": "a: !!int '7'",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "a": {
+          "t": "int",
+          "v": 7
+        }
+      }
+    }
+  },
+  {
+    "yaml": "id: no\nconcept: yes",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "id": {
+          "t": "bool",
+          "v": false
+        },
+        "concept": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    }
+  },
+  {
+    "yaml": "tier: 1\nlevel: 1.0",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "tier": {
+          "t": "int",
+          "v": 1
+        },
+        "level": {
+          "t": "float",
+          "v": 1.0
+        }
+      }
+    }
+  },
+  {
+    "yaml": "ttl_s: 30\nratio: 0.50",
+    "pyyaml": {
+      "t": "map",
+      "v": {
+        "ttl_s": {
+          "t": "int",
+          "v": 30
+        },
+        "ratio": {
+          "t": "float",
+          "v": 0.5
+        }
+      }
+    }
+  }
+]

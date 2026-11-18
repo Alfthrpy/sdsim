@@ -1,0 +1,286 @@
+# Conformance cases for contract/descriptor.schema.json (a component, policy or scenario declares itself).
+# `descriptor` is the full entry; `valid` the verdict; invalid cases say where and why (at, keyword, property).
+# The `cache` below is illustrative of the format, not the real cache component (S-024 defines that).
+- name: cache-component
+  valid: true
+  descriptor:
+    kind: component
+    id: cache
+    label_key: component.cache
+    parameters:
+      - {
+          id: capacity_pct,
+          label_key: param.capacity-pct,
+          kind: number,
+          unit: percent,
+          min: 0,
+          max: 100,
+          default: 0,
+          step: 1,
+        }
+      - { id: ttl_s, label_key: param.ttl-s, kind: number, unit: s, min: 0, max: 3600, default: 30 }
+      - {
+          id: mode,
+          label_key: param.mode,
+          kind: enum,
+          unit: none,
+          values: [look-aside, read-through],
+          default: look-aside,
+        }
+    metrics:
+      - { id: hit_ratio, label_key: metric.hit-ratio, unit: fraction, aggregates: [mean] }
+    honesty: { label: modeled, evidence: [V4.cold-cache-shape], sources: [cache-aside-pattern] }
+- name: illustrative-component
+  valid: true
+  descriptor:
+    kind: component
+    id: db
+    label_key: component.db
+    parameters:
+      - { id: pool, label_key: param.pool, kind: integer, unit: count, min: 1, max: 64, default: 4 }
+    metrics:
+      - { id: utilization, label_key: metric.utilization, unit: fraction, aggregates: [mean, max] }
+    honesty: { label: illustrative, assumption: A-M4 }
+- name: not-modeled-component
+  valid: true
+  descriptor:
+    kind: component
+    id: query-planner
+    label_key: component.query-planner
+    parameters: []
+    metrics:
+      - { id: query_cost, label_key: metric.query-cost, unit: ms, aggregates: [mean] }
+    honesty: { label: not-modeled }
+- name: retry-policy
+  valid: true
+  descriptor:
+    kind: policy
+    id: retry
+    label_key: policy.retry
+    parameters:
+      - {
+          id: max_attempts,
+          label_key: param.max-attempts,
+          kind: integer,
+          unit: count,
+          min: 1,
+          max: 10,
+          default: 3,
+        }
+      - { id: jitter, label_key: param.jitter, kind: boolean, unit: none, default: true }
+    honesty: { label: modeled, evidence: [V4.retry-amplification, V10.retry.budget] }
+- name: bad-deploy-scenario
+  valid: true
+  descriptor:
+    kind: scenario
+    id: bad-deploy
+    label_key: scenario.bad-deploy
+    parameters:
+      - {
+          id: error_rate,
+          label_key: param.error-rate,
+          kind: number,
+          unit: fraction,
+          min: 0,
+          max: 1,
+          default: 0.5,
+        }
+    honesty: { label: illustrative, assumption: A-M8 }
+
+- name: modeled-without-evidence
+  valid: false
+  at: /honesty
+  keyword: required
+  property: evidence
+  descriptor:
+    {
+      kind: policy,
+      id: retry,
+      label_key: policy.retry,
+      parameters: [],
+      honesty: { label: modeled },
+    }
+- name: modeled-with-empty-evidence
+  valid: false
+  at: /honesty/evidence
+  keyword: minItems
+  descriptor:
+    {
+      kind: policy,
+      id: retry,
+      label_key: policy.retry,
+      parameters: [],
+      honesty: { label: modeled, evidence: [] },
+    }
+- name: evidence-id-of-a-kind-that-is-not-allowed
+  valid: false
+  at: /honesty/evidence/0
+  keyword: pattern
+  descriptor:
+    {
+      kind: policy,
+      id: retry,
+      label_key: policy.retry,
+      parameters: [],
+      honesty: { label: modeled, evidence: [V2.little-law] },
+    }
+- name: illustrative-without-assumption
+  valid: false
+  at: /honesty
+  keyword: required
+  property: assumption
+  descriptor:
+    {
+      kind: policy,
+      id: retry,
+      label_key: policy.retry,
+      parameters: [],
+      honesty: { label: illustrative },
+    }
+- name: assumption-id-malformed
+  valid: false
+  at: /honesty/assumption
+  keyword: pattern
+  descriptor:
+    {
+      kind: policy,
+      id: retry,
+      label_key: policy.retry,
+      parameters: [],
+      honesty: { label: illustrative, assumption: M4 },
+    }
+- name: honesty-label-unknown
+  valid: false
+  at: /honesty/label
+  keyword: enum
+  descriptor:
+    {
+      kind: policy,
+      id: retry,
+      label_key: policy.retry,
+      parameters: [],
+      honesty: { label: sort-of-modeled },
+    }
+- name: component-without-metrics
+  valid: false
+  at: ""
+  keyword: oneOf
+  descriptor:
+    {
+      kind: component,
+      id: cache,
+      label_key: component.cache,
+      parameters: [],
+      honesty: { label: not-modeled },
+    }
+- name: number-parameter-without-range
+  valid: false
+  at: /parameters/0
+  keyword: required
+  property: min
+  descriptor:
+    kind: policy
+    id: retry
+    label_key: policy.retry
+    parameters:
+      [
+        {
+          id: max_attempts,
+          label_key: param.max-attempts,
+          kind: integer,
+          unit: count,
+          max: 10,
+          default: 3,
+        },
+      ]
+    honesty: { label: not-modeled }
+- name: enum-parameter-without-values
+  valid: false
+  at: /parameters/0
+  keyword: required
+  property: values
+  descriptor:
+    kind: policy
+    id: retry
+    label_key: policy.retry
+    parameters: [{ id: mode, label_key: param.mode, kind: enum, unit: none, default: a }]
+    honesty: { label: not-modeled }
+- name: parameter-id-not-snake-case
+  valid: false
+  at: /parameters/0/id
+  keyword: pattern
+  descriptor:
+    kind: policy
+    id: retry
+    label_key: policy.retry
+    parameters:
+      [
+        {
+          id: maxAttempts,
+          label_key: param.max-attempts,
+          kind: integer,
+          unit: count,
+          min: 1,
+          max: 2,
+          default: 1,
+        },
+      ]
+    honesty: { label: not-modeled }
+- name: unit-not-in-the-list
+  valid: false
+  at: /parameters/0/unit
+  keyword: enum
+  descriptor:
+    kind: policy
+    id: retry
+    label_key: policy.retry
+    parameters:
+      [
+        {
+          id: delay,
+          label_key: param.delay,
+          kind: number,
+          unit: furlongs,
+          min: 0,
+          max: 2,
+          default: 1,
+        },
+      ]
+    honesty: { label: not-modeled }
+- name: label-key-with-spaces
+  valid: false
+  at: /label_key
+  keyword: pattern
+  descriptor:
+    {
+      kind: policy,
+      id: retry,
+      label_key: "Retry policy",
+      parameters: [],
+      honesty: { label: not-modeled },
+    }
+- name: unknown-field
+  valid: false
+  at: ""
+  keyword: oneOf
+  descriptor:
+    {
+      kind: policy,
+      id: retry,
+      label_key: policy.retry,
+      parameters: [],
+      honesty: { label: not-modeled },
+      price: 3,
+    }
+- name: kind-unknown
+  valid: false
+  at: ""
+  keyword: oneOf
+  descriptor:
+    {
+      kind: widget,
+      id: retry,
+      label_key: policy.retry,
+      parameters: [],
+      honesty: { label: not-modeled },
+    }
