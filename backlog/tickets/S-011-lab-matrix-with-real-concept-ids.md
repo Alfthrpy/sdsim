@@ -5,7 +5,7 @@ milestone: S1
 type: lab
 owner: agent
 review: human
-status: todo
+status: in-progress
 priority: high
 depends_on: [S-010]
 estimate: 1
