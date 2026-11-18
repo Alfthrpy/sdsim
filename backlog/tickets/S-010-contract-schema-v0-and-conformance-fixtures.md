@@ -7,7 +7,7 @@ owner: agent
 review: agent
 status: todo
 priority: high
-depends_on: [S-001]
+depends_on: [S-001, S-103]
 estimate: 1
 outputs:
   - contract/
@@ -19,7 +19,7 @@ Part of the MVP path (BG1 + BG2, "early access"). Source row: `docs/PLAN.md` sec
 
 ## Tasks
 
-JSON Schema matching content-schema §5 with keys/skew under traffic (R24); component descriptor format (parameters, units, ranges, defaults, metrics, honesty, evidence); predicate argument shapes, scenario fields, metric ids and units; conformance fixtures incl. the real caching lab and YAML-dialect cases. Must accept R6/R7.
+JSON Schema matching content-schema §5 with keys/skew under traffic (R24); component descriptor format (parameters, units, ranges, defaults, metrics, honesty, evidence); predicate argument shapes, scenario fields, metric ids and units; conformance fixtures incl. the real caching lab and YAML-dialect cases. Must accept R6/R7. Also the scenario and play fields from `docs/design/lab-flow.md` section 5 (`scenario.story`, `scenario.symptom`, `scenario.timeline[]`, `scenario.observe[]`, `play.speeds`) and the metric `node_status`, once S-103 is approved.
 
 ## Done criteria
 
