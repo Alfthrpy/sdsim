@@ -10,7 +10,7 @@ import sys
 
 import common
 from common import (MILESTONES, OWNERS, PRIORITIES, REVIEWS, ROOT, SDLAB_DEP, STATUSES, TICKET_ID, TYPES,
-                    is_sdlab_dep, load_tickets)
+                    deps_of, is_sdlab_dep, load_tickets)
 
 errors: list[str] = []
 warnings: list[str] = []
@@ -95,22 +95,27 @@ def check_tickets():
 
     status = {t.get("id"): t.get("status") for t in tickets}
     sdlab_status = common.load_sdlab_status()
-    unchecked = 0
+    unchecked: set[str] = set()
     for t in tickets:
         where = rel(t["_path"])
         deps = t.get("depends_on") or []
         if not isinstance(deps, list):
             continue  # already reported above
+        seen: set[str] = set()
         for d in deps:
             if not isinstance(d, str):
                 err(where, f"depends_on entry {d!r} is not a ticket id; write cross-repo ids as `sdlab:P1-064` "
                            "(no space after the colon)")
-            elif is_sdlab_dep(d):
+                continue
+            if d in seen:
+                warn(where, f"depends_on lists {d} more than once")
+            seen.add(d)
+            if is_sdlab_dep(d):
                 m = SDLAB_DEP.match(d)
                 if not m:
                     err(where, f"depends_on entry {d!r} is not a valid sdlab id (format sdlab:P1-064)")
                 elif sdlab_status is None:
-                    unchecked += 1
+                    unchecked.add(d)
                 elif m.group(1) not in sdlab_status:
                     err(where, f"depends_on names an unknown sdlab ticket: {d}")
                 elif t.get("status") in ("in-progress", "review", "done") and sdlab_status[m.group(1)] != "done":
@@ -120,11 +125,11 @@ def check_tickets():
             elif t.get("status") in ("in-progress", "review", "done") and status[d] != "done":
                 warn(where, f"status is {t.get('status')} but dependency {d} is still {status[d]}")
     if unchecked:
-        warn("backlog", f"{unchecked} sdlab dependencies not checked: no sdlab checkout at {common.sdlab_dir()} "
-                        "(set SDLAB_DIR to its path)")
+        warn("backlog", f"{len(unchecked)} sdlab dependencies not checked: no sdlab checkout at "
+                        f"{common.sdlab_dir()} (set SDLAB_DIR to its path)")
 
-    graph = {t.get("id"): [d for d in (t.get("depends_on") or []) if isinstance(d, str) and not is_sdlab_dep(d)]
-             if isinstance(t.get("depends_on") or [], list) else [] for t in tickets}
+    # find_cycle ignores names that are not tickets here, so an sdlab id never takes part in a cycle.
+    graph = {t.get("id"): deps_of(t) for t in tickets}
     cyc = find_cycle(graph)
     if cyc:
         err("backlog", "ticket dependency cycle: " + " -> ".join(cyc))

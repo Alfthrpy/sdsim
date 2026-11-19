@@ -82,8 +82,8 @@ A change to the contract that affects lab specs is a contract change: it follows
 
 `depends_on` may name a ticket in `sdlab` as `sdlab:<id>`, for example `depends_on: [S-011, sdlab:P1-064]` (no space after the colon: `sdlab: P1-064` is a YAML mapping and is rejected).
 
-- **Where sdlab is read from:** `$SDLAB_DIR` if set, else the sibling folder `../sdlab`. Only `backlog/tickets/*.md` is read, never written.
-- **`scripts/validate.py`:** a malformed id is an error. With a checkout, an id that sdlab does not have is an error, and a ticket that is `in-progress`, `review` or `done` while its sdlab dependency is not `done` is a warning. Without a checkout (CI today) the ids are only format-checked and one warning says how many were not checked.
+- **Where sdlab is read from:** `$SDLAB_DIR` if set, else the sibling folder `../sdlab`. Only `backlog/tickets/*.md` is read, never written; a file that cannot be parsed is skipped.
+- **`scripts/validate.py`:** a malformed id is an error, and a repeated entry is a warning. With a checkout, an id that sdlab does not have is an error, and a ticket that is `in-progress`, `review` or `done` while its sdlab dependency is not `done` is a warning. Without a checkout (CI today) the ids are only format-checked and one warning says how many distinct ids were not checked.
 - **`python scripts/board.py --next`:** a ticket with an sdlab dependency is ready only when the sdlab ticket is `done` in the checkout; with no checkout it is not listed, and a note says so.
 - **`backlog/BOARD.md`** is committed and checked in CI, so it must not depend on sdlab's state: such tickets are never in "Ready for agents" and appear under "Waiting on sdlab" (the section exists only while one does).
 - An sdlab dependency is not part of the cycle check.

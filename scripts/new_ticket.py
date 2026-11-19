@@ -2,10 +2,11 @@
 """Create a new ticket from the template.
 
   python scripts/new_ticket.py "Engine: event heap" --milestone S2 --type engine \
-      [--depends S-003] [--id S-020] [--owner agent] [--review agent] [--priority medium]
+      [--depends S-003 sdlab:P1-064] [--id S-020] [--owner agent] [--review agent] [--priority medium]
 
 Without --id, the next free number is used (S-0xx). With --sub and a dependency, a sub-ticket id
-(S-020a, b, ...) is derived from the first dependency.
+(S-020a, b, ...) is derived from the first dependency, which must then be an S-0xx ticket.
+A dependency on an sdlab ticket is written `sdlab:<id>` (docs/workflow.md); validate.py checks it.
 """
 from __future__ import annotations
 
@@ -49,6 +50,8 @@ def main():
     ap.add_argument("--sub", action="store_true", help="derive a sub-ticket id from the first dependency")
     a = ap.parse_args()
 
+    if a.sub and not (a.depends and re.match(r"^S-\d{3}$", a.depends[0])):
+        raise SystemExit("--sub needs the first --depends to be an S-0xx ticket (the parent).")
     existing = {t.get("id") for t in load_tickets()}
     parent = a.depends[0] if a.depends and a.sub else None
     tid = a.id or next_id(existing, parent)

@@ -11,11 +11,11 @@ ROOT = Path(__file__).resolve().parent.parent
 TICKETS_DIR = ROOT / "backlog" / "tickets"
 
 # Ticket ids follow the STUD Simulator Master Plan: S-001, sub-tickets S-001a.
-TICKET_ID = re.compile(r"^S-\d{3}[a-z]?$")
+TICKET_ID = re.compile(r"^S-\d{3}[a-z]?\Z")
 # A dependency on a ticket in the sibling repo `sdlab` is written `sdlab:<id>` (PLAN R16). sdlab ids are
 # P1-064 style; its own validator uses the same pattern.
 SDLAB_PREFIX = "sdlab:"
-SDLAB_DEP = re.compile(r"^sdlab:(P\d-\d{3}[a-z]?)$")
+SDLAB_DEP = re.compile(r"^sdlab:(P\d-\d{3}[a-z]?)\Z")
 STATUSES = ["todo", "in-progress", "review", "blocked", "done"]
 OWNERS = ["agent", "human"]
 REVIEWS = ["agent", "human", "none"]
@@ -45,6 +45,13 @@ def load_tickets() -> list[dict]:
     return tickets
 
 
+def deps_of(t: dict) -> list[str]:
+    """The string entries of a ticket's `depends_on`; [] when it is not a list. Malformed entries are
+    reported by validate.py, and every other script must keep working while they exist."""
+    deps = t.get("depends_on")
+    return [d for d in deps if isinstance(d, str)] if isinstance(deps, list) else []
+
+
 def is_sdlab_dep(dep) -> bool:
     return isinstance(dep, str) and dep.startswith(SDLAB_PREFIX)
 
@@ -67,7 +74,7 @@ def load_sdlab_status() -> dict[str, str] | None:
     for p in sorted(tdir.glob("*.md")):
         try:
             fm, _ = split_frontmatter(p.read_text(encoding="utf-8"))
-        except (OSError, UnicodeDecodeError, yaml.YAMLError):
+        except (OSError, ValueError, yaml.YAMLError):  # ValueError: bad bytes or an impossible date
             continue
         if isinstance(fm, dict) and isinstance(fm.get("id"), str) and isinstance(fm.get("status"), str):
             out[fm["id"]] = fm["status"]
@@ -96,6 +103,6 @@ def ready_tickets(tickets: list[dict], owner: str | None = "agent",
             continue
         if owner and t.get("owner") != owner:
             continue
-        if all(dep_done(d, status, sdlab_status) for d in t.get("depends_on") or []):
+        if all(dep_done(d, status, sdlab_status) for d in deps_of(t)):
             out.append(t)
     return sorted(out, key=sort_key)

@@ -143,8 +143,32 @@ class SdlabDependencies(unittest.TestCase):
         files = sdlab_files(P1_064="done")
         files["bad.md"] = "---\n: : [\n---\n"
         files["nofm.md"] = "no frontmatter"
-        errs, _ = self.one("[sdlab:P1-064]", sdlab=files)
+        files["date.md"] = "---\nid: P1-070\nstatus: todo\nd: 2020-99-99\n---\n"  # PyYAML raises ValueError
+        files["notstr.md"] = "---\nid: P1-071\nstatus: 5\n---\n"
+        errs, _ = self.one("[sdlab:P1-064, sdlab:P1-071]", sdlab=files)
+        self.assertEqual(len(errs), 1)  # P1-071 has no usable status, so it is unknown; nothing crashes
+        self.assertIn("P1-071", errs[0])
+
+    def test_trailing_newline_is_not_a_valid_id(self):
+        errs, _ = self.one('["sdlab:P1-064\\n"]', sdlab=sdlab_files(P1_064="done"))
+        self.assertTrue(errs)
+
+    def test_duplicates_warn_and_are_counted_once(self):
+        _, warns = self.one("[sdlab:P1-064, sdlab:P1-064]", sdlab=sdlab_files(P1_064="done"))
+        self.assertEqual(len(warns), 1)
+        self.assertIn("more than once", warns[0])
+        _, warns = self.one("[sdlab:P1-064, sdlab:P1-064]", sdlab=None)
+        self.assertEqual(sum("1 sdlab dependencies not checked" in w for w in warns), 1)
+        errs, warns = run({"S-001-a.md": GOOD.format(id="S-001", status="todo", deps="[S-002, S-002]"),
+                           "S-002-b.md": GOOD.format(id="S-002", status="todo", deps="[]")})
         self.assertEqual(errs, [])
+        self.assertTrue(any("more than once" in w for w in warns))
+
+    def test_any_malformed_depends_on_gives_errors_not_a_crash(self):
+        for deps in ("[sdlab: P1-064]", "[null]", "[[S-001]]", "5", "S-002", "{a: 1}"):
+            with self.subTest(deps=deps):
+                errs, _ = self.one(deps, sdlab=sdlab_files(P1_064="done"))
+                self.assertTrue(errs, deps)
 
 
 class Readiness(unittest.TestCase):
@@ -162,6 +186,55 @@ class Readiness(unittest.TestCase):
 
     def test_no_checkout_means_not_ready(self):
         self.assertEqual(self.ids(None), ["S-002"])
+
+    def test_malformed_depends_on_does_not_crash_readiness_or_board(self):
+        for bad in ([{"sdlab": "P1-064"}], [None], [["S-003"]], 5, "S-003", {"a": 1}, None):
+            with self.subTest(bad=bad):
+                tickets = [{**t, "title": "T", "estimate": 1, "milestone": "S0", "review": "agent",
+                            "_path": Path(f"{t['id']}-x.md")} for t in self.tickets()]
+                tickets[1]["depends_on"] = bad
+                tickets.append({**tickets[0], "id": "S-004", "owner": "human", "_path": Path("S-004-x.md"),
+                                "depends_on": bad})
+                common.ready_tickets(tickets, "agent", {})
+                board.render(tickets)
+
+    def test_board_sections(self):
+        mk = lambda i, status, deps: {"id": i, "status": status, "owner": "agent", "priority": "medium",
+                                      "depends_on": deps, "title": "T", "estimate": 1, "milestone": "S0",
+                                      "review": "agent", "_path": Path(f"{i}-x.md")}
+
+        def sections(tickets):
+            text = board.render(tickets)
+            ready = text.split("## Ready for agents")[1].split("\n## ")[0]
+            waiting = text.split("## Waiting on sdlab")[1].split("\n## ")[0] if "## Waiting on sdlab" in text else ""
+            return text, ready, waiting
+
+        # blocked by an unfinished sdsim ticket: in neither section, even with an sdlab dependency as well
+        text, ready, waiting = sections([mk("S-001", "todo", ["S-002", "sdlab:P1-064"]), mk("S-002", "todo", [])])
+        self.assertNotIn("S-001", ready)
+        self.assertNotIn("S-001", waiting)
+        # sdsim dependencies done: waits on sdlab, and only the sdlab id is shown there
+        text, ready, waiting = sections([mk("S-001", "todo", ["S-002", "sdlab:P1-064"]), mk("S-002", "done", [])])
+        self.assertNotIn("S-001", ready)
+        self.assertIn("sdlab:P1-064", waiting)
+        self.assertNotIn("S-002", waiting)
+        # no ticket has an sdlab dependency: the section is absent, and the board is the same text as before
+        text, ready, waiting = sections([mk("S-001", "todo", ["S-002"]), mk("S-002", "done", [])])
+        self.assertNotIn("Waiting on sdlab", text)
+        self.assertIn("S-001", ready)
+
+    def test_board_text_ignores_the_sdlab_checkout(self):
+        tickets = [{**t, "title": "T", "estimate": 1, "milestone": "S0", "review": "agent",
+                    "_path": Path(f"{t['id']}-x.md")} for t in self.tickets()]
+        with tempfile.TemporaryDirectory() as d:
+            (Path(d) / "backlog" / "tickets").mkdir(parents=True)
+            for name, text in sdlab_files(P1_064="done").items():
+                (Path(d) / "backlog" / "tickets" / name).write_text(text, encoding="utf-8")
+            with mock.patch.dict(os.environ, {"SDLAB_DIR": d}):
+                with_checkout = board.render(tickets)
+            with mock.patch.dict(os.environ, {"SDLAB_DIR": str(Path(d) / "nowhere")}):
+                without = board.render(tickets)
+        self.assertEqual(with_checkout, without)
 
     def test_board_file_does_not_depend_on_sdlab(self):
         tickets = [{**t, "title": "T", "estimate": 1, "milestone": "S0", "review": "agent",

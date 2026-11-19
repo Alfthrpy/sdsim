@@ -10,8 +10,8 @@ from __future__ import annotations
 import sys
 from collections import Counter
 
-from common import (MILESTONE_NAMES, ROOT, is_sdlab_dep, load_sdlab_status, load_tickets, ready_tickets,
-                    sort_key)
+from common import (MILESTONE_NAMES, ROOT, dep_done, deps_of, is_sdlab_dep, load_sdlab_status, load_tickets,
+                    ready_tickets, sort_key)
 
 BOARD = ROOT / "backlog" / "BOARD.md"
 ICON = {"todo": "·", "in-progress": "▶", "review": "◆", "blocked": "✖", "done": "✓"}
@@ -45,14 +45,14 @@ def render(tickets: list[dict]) -> str:
 
     status = {t["id"]: t.get("status") for t in tickets}
     waiting = [t for t in tickets if t.get("status") == "todo" and t.get("owner") == "agent"
-               and any(is_sdlab_dep(d) for d in t.get("depends_on") or [])
-               and all(is_sdlab_dep(d) or status.get(d) == "done" for d in t.get("depends_on") or [])]
+               and any(is_sdlab_dep(d) for d in deps_of(t))
+               and all(is_sdlab_dep(d) or status.get(d) == "done" for d in deps_of(t))]
     if waiting:
         out += ["## Waiting on sdlab", "",
                 "Ready once the sdlab tickets are done (`python scripts/board.py --next` reads `../sdlab`).", "",
                 "| Ticket | Title | sdlab dependencies |", "| --- | --- | --- |"]
         out += [f"| {link(t)} | {t['title']} | "
-                f"{', '.join(d for d in t['depends_on'] if is_sdlab_dep(d))} |" for t in sorted(waiting, key=sort_key)]
+                f"{', '.join(d for d in deps_of(t) if is_sdlab_dep(d))} |" for t in sorted(waiting, key=sort_key)]
         out.append("")
 
     human = [t for t in tickets if t.get("owner") == "human" and t.get("status") in ("todo", "in-progress")]
@@ -60,7 +60,7 @@ def render(tickets: list[dict]) -> str:
     out += ["## Waiting on owner (human)", ""]
     rows = []
     for t in sorted(human, key=sort_key):
-        deps_ok = all(by_id.get(d, {}).get("status") == "done" for d in t.get("depends_on") or [])
+        deps_ok = all(dep_done(d, status, None) for d in deps_of(t))
         rows.append(f"| {link(t)} | {t['title']} | {'ready' if deps_ok else 'waiting on dependencies'} |")
     for t in sorted(human_review, key=sort_key):
         rows.append(f"| {link(t)} | Review: {t['title']} | needs review |")
@@ -85,7 +85,7 @@ def render(tickets: list[dict]) -> str:
         out += [f"### {ms} — {name} ({done}/{len(ts)} done)", "",
                 "| | Ticket | Title | Owner | Review | Depends on |", "| --- | --- | --- | --- | --- | --- |"]
         for t in ts:
-            deps = ", ".join(t.get("depends_on") or []) or "—"
+            deps = ", ".join(deps_of(t)) or "—"
             out.append(f"| {ICON.get(t.get('status'), '?')} | {link(t)} | {t['title']} | {t['owner']} | "
                        f"{t['review']} | {deps} |")
         out.append("")
@@ -99,7 +99,7 @@ def main():
     if "--next" in sys.argv:
         sdlab_status = load_sdlab_status()
         ready = ready_tickets(tickets, "agent", sdlab_status)
-        if sdlab_status is None and any(is_sdlab_dep(d) for t in tickets for d in t.get("depends_on") or []):
+        if sdlab_status is None and any(is_sdlab_dep(d) for t in tickets for d in deps_of(t)):
             print("note: no sdlab checkout found (set SDLAB_DIR); tickets with sdlab: dependencies are not listed.")
         if not ready:
             print("No agent ticket is ready. Check the owner: human tickets in BOARD.md.")
