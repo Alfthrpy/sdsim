@@ -5,7 +5,7 @@ milestone: S0
 type: infra
 owner: agent
 review: agent
-status: todo
+status: in-progress
 priority: medium
 depends_on: [S-001]
 estimate: 1
