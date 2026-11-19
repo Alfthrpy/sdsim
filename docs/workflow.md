@@ -77,3 +77,13 @@ One session = one ticket (or one sub-ticket). If a session stops midway, the sta
 ## 5. Cross-repo work with sdlab
 
 A change to the contract that affects lab specs is a contract change: it follows the change protocol in `docs/PLAN.md`, bumps the contract version, and `sdlab` is updated by a ticket in `sdlab` that vendors the new version. Never edit `sdlab` files from a `sdsim` session, and never edit `sdsim` from an `sdlab` session; write the needed follow-up as a ticket in the other repo (or tell the owner).
+
+### Depending on an sdlab ticket
+
+`depends_on` may name a ticket in `sdlab` as `sdlab:<id>`, for example `depends_on: [S-011, sdlab:P1-064]` (no space after the colon: `sdlab: P1-064` is a YAML mapping and is rejected).
+
+- **Where sdlab is read from:** `$SDLAB_DIR` if set, else the sibling folder `../sdlab`. Only `backlog/tickets/*.md` is read, never written.
+- **`scripts/validate.py`:** a malformed id is an error. With a checkout, an id that sdlab does not have is an error, and a ticket that is `in-progress`, `review` or `done` while its sdlab dependency is not `done` is a warning. Without a checkout (CI today) the ids are only format-checked and one warning says how many were not checked.
+- **`python scripts/board.py --next`:** a ticket with an sdlab dependency is ready only when the sdlab ticket is `done` in the checkout; with no checkout it is not listed, and a note says so.
+- **`backlog/BOARD.md`** is committed and checked in CI, so it must not depend on sdlab's state: such tickets are never in "Ready for agents" and appear under "Waiting on sdlab" (the section exists only while one does).
+- An sdlab dependency is not part of the cycle check.

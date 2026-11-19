@@ -8,7 +8,9 @@ from __future__ import annotations
 import re
 import sys
 
-from common import (MILESTONES, OWNERS, PRIORITIES, REVIEWS, ROOT, STATUSES, TICKET_ID, TYPES, load_tickets)
+import common
+from common import (MILESTONES, OWNERS, PRIORITIES, REVIEWS, ROOT, SDLAB_DEP, STATUSES, TICKET_ID, TYPES,
+                    is_sdlab_dep, load_tickets)
 
 errors: list[str] = []
 warnings: list[str] = []
@@ -92,15 +94,37 @@ def check_tickets():
             err(where, "status is blocked with no explanation in Notes")
 
     status = {t.get("id"): t.get("status") for t in tickets}
+    sdlab_status = common.load_sdlab_status()
+    unchecked = 0
     for t in tickets:
         where = rel(t["_path"])
-        for d in t.get("depends_on") or []:
-            if d not in status:
+        deps = t.get("depends_on") or []
+        if not isinstance(deps, list):
+            continue  # already reported above
+        for d in deps:
+            if not isinstance(d, str):
+                err(where, f"depends_on entry {d!r} is not a ticket id; write cross-repo ids as `sdlab:P1-064` "
+                           "(no space after the colon)")
+            elif is_sdlab_dep(d):
+                m = SDLAB_DEP.match(d)
+                if not m:
+                    err(where, f"depends_on entry {d!r} is not a valid sdlab id (format sdlab:P1-064)")
+                elif sdlab_status is None:
+                    unchecked += 1
+                elif m.group(1) not in sdlab_status:
+                    err(where, f"depends_on names an unknown sdlab ticket: {d}")
+                elif t.get("status") in ("in-progress", "review", "done") and sdlab_status[m.group(1)] != "done":
+                    warn(where, f"status is {t.get('status')} but dependency {d} is still {sdlab_status[m.group(1)]}")
+            elif d not in status:
                 err(where, f"depends_on names an unknown ticket: {d}")
             elif t.get("status") in ("in-progress", "review", "done") and status[d] != "done":
                 warn(where, f"status is {t.get('status')} but dependency {d} is still {status[d]}")
+    if unchecked:
+        warn("backlog", f"{unchecked} sdlab dependencies not checked: no sdlab checkout at {common.sdlab_dir()} "
+                        "(set SDLAB_DIR to its path)")
 
-    graph = {t.get("id"): list(t.get("depends_on") or []) for t in tickets}
+    graph = {t.get("id"): [d for d in (t.get("depends_on") or []) if isinstance(d, str) and not is_sdlab_dep(d)]
+             if isinstance(t.get("depends_on") or [], list) else [] for t in tickets}
     cyc = find_cycle(graph)
     if cyc:
         err("backlog", "ticket dependency cycle: " + " -> ".join(cyc))
